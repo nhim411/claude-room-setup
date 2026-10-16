@@ -76,6 +76,10 @@ paseo daemon reload       # add --host <listen> if needed (step 1)
 ./install --verify        # must end with VERIFY_OK
 ```
 
+`--verify` also asks the running daemon (`paseo provider ls`, using
+`daemon.listen` as `--host`) whether it serves the three `claude-*` providers.
+If the daemon is intentionally stopped, use `./install --verify --offline`.
+
 Any `FAIL` line in `--verify` is a stop: report it with the Troubleshooting
 table below instead of continuing.
 
@@ -126,7 +130,8 @@ the old ones.
 
 | Symptom | Cause and fix |
 | --- | --- |
-| `claude-*` providers missing in Paseo | Run `paseo daemon reload`, then `./install --verify` |
+| `claude-*` providers missing in Paseo, or verify `daemon serves claude-*` FAIL | Run `paseo daemon reload` (with `--host` if needed), wait a few seconds for status `available`, then `./install --verify` |
+| Verify says daemon unreachable | Start Paseo (Desktop or `paseo daemon start`); or `--offline` to check files only |
 | Profiles section empty in the model picker | Same as above; check `daemon.agentProfiles` contains `claude-room-*` |
 | `paseo` says daemon not running while the app works | The daemon listens on a non-default address: pass `--host` (step 1) |
 | Agent fails at launch | Run `claude-room lead -p "role?"`; ensure `claude` is on PATH or set `CLAUDE_BIN` |

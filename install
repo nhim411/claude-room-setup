@@ -3,7 +3,8 @@
 
   ./install              print the plan, change nothing
   ./install --apply      copy role files, merge claude-<role> providers and profiles
-  ./install --verify     check installed files and provider policy
+  ./install --verify     check installed files, provider policy and the live daemon
+                         (add --offline to skip the daemon check while it is stopped)
   ./install --uninstall  remove the providers, profiles and installed files (with --apply)
 
 Every file that is replaced or removed is backed up first as
@@ -19,6 +20,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import time
 
@@ -194,7 +196,27 @@ def uninstall(home: Path, apply: bool) -> int:
     return 0
 
 
-def verify(home: Path) -> int:
+def live_providers(config: dict) -> tuple[dict, str]:
+    """Ask the running daemon which providers it serves: ({name: status}, failure hint)."""
+    paseo = shutil.which("paseo")
+    if not paseo:
+        return {}, "paseo CLI not on PATH; rerun with --offline to skip the daemon check"
+    command = [paseo, "provider", "ls", "--json"]
+    listen = config.get("daemon", {}).get("listen")
+    if isinstance(listen, str) and listen:
+        command += ["--host", listen]
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", timeout=30)
+        rows = json.loads(result.stdout)
+    except (OSError, ValueError, subprocess.TimeoutExpired):
+        rows = None
+    if not isinstance(rows, list):
+        return {}, "daemon unreachable: start Paseo, or rerun with --offline"
+    live = {row.get("provider"): row.get("status") for row in rows if isinstance(row, dict)}
+    return live, "run `paseo daemon reload` (add --host <daemon.listen> if needed) and retry once providers are available"
+
+
+def verify(home: Path, offline: bool) -> int:
     failures = 0
 
     def check(label: str, ok: bool) -> None:
@@ -227,6 +249,15 @@ def verify(home: Path) -> int:
     for profile in source_profiles():
         check(f"profile {profile['name']} matches repository", profiles.get(profile["id"]) == profile)
     check("daemon injects Paseo MCP", config.get("daemon", {}).get("mcp", {}).get("injectIntoAgents") is True)
+    if offline:
+        print("SKIP  live daemon check (--offline)")
+    else:
+        live, hint = live_providers(config)
+        before = failures
+        for name in PROVIDERS:
+            check(f"daemon serves {name}", live.get(name) == "available")
+        if failures > before:
+            print(f"HINT  {hint}")
     print("VERIFY_OK" if failures == 0 else f"VERIFY_FAILED: {failures} check(s)")
     return int(failures > 0)
 
@@ -234,6 +265,7 @@ def verify(home: Path) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--offline", action="store_true", help="with --verify: skip the live daemon check")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--verify", action="store_true")
     mode.add_argument("--uninstall", action="store_true")
@@ -242,7 +274,7 @@ def main() -> int:
         return fail("Python 3.9+ is required")
     home = target_home()
     if args.verify:
-        return verify(home)
+        return verify(home, args.offline)
     if args.uninstall:
         return uninstall(home, args.apply)
     return install(home, args.apply)

@@ -120,6 +120,20 @@ class InstallerTests(unittest.TestCase):
     def run_installer(self, *args: str) -> subprocess.CompletedProcess:
         return subprocess.run([sys.executable, str(INSTALLER), *args], env=self.env, capture_output=True, text=True)
 
+    def fake_daemon(self, providers: list[str]) -> None:
+        """Put a fake `paseo` on PATH whose `provider ls --json` lists these providers as available."""
+        bin_dir = self.home / "fake-bin"
+        bin_dir.mkdir(exist_ok=True)
+        rows = Path(bin_dir / "rows.json")
+        rows.write_text(json.dumps([{"provider": name, "status": "available"} for name in providers]))
+        if os.name == "nt":
+            (bin_dir / "paseo.cmd").write_text(f'@type "{rows}"\r\n')
+        else:
+            fake = bin_dir / "paseo"
+            fake.write_text(f"#!/bin/sh\ncat '{rows}'\n")
+            fake.chmod(0o755)
+        self.env["PATH"] = str(bin_dir) + os.pathsep + os.environ.get("PATH", "")
+
     def backups(self) -> list[Path]:
         return list(self.home.rglob("*.claude-room-*.bak"))
 
@@ -146,8 +160,18 @@ class InstallerTests(unittest.TestCase):
         launcher = str(self.home / ".local/bin/claude-room")
         command = config["agents"]["providers"]["claude-lead"]["command"]
         self.assertEqual(command, [sys.executable, launcher, "lead"] if os.name == "nt" else [launcher, "lead"])
+        self.fake_daemon(["claude", "claude-supervisor", "claude-lead", "claude-peer"])
         verified = self.run_installer("--verify")
         self.assertEqual(verified.returncode, 0, verified.stdout)
+        self.assertIn("OK    daemon serves claude-peer", verified.stdout)
+        self.fake_daemon(["claude", "claude-supervisor"])
+        stale = self.run_installer("--verify")
+        self.assertNotEqual(stale.returncode, 0)
+        self.assertIn("FAIL  daemon serves claude-lead", stale.stdout)
+        self.assertIn("paseo daemon reload", stale.stdout)
+        offline = self.run_installer("--verify", "--offline")
+        self.assertEqual(offline.returncode, 0, offline.stdout)
+        self.assertIn("SKIP  live daemon check", offline.stdout)
         self.assertEqual(len(self.backups()), 1)
 
         again = self.run_installer("--apply")

@@ -136,6 +136,28 @@ Supervisor tạo heartbeat 10 phút và kiểm tra vòng "Lead giao, Peer trả,
 nghiệm thu". Nó chỉ nhắn Lead khi thấy vòng bị hở hoặc việc đi lệch mục tiêu,
 và không tự sửa code.
 
+Supervisor không giao việc: bạn vẫn giao outcome trực tiếp cho Lead. Giao cho
+Supervisor việc giám sát không phải là giao task cho Lead.
+
+#### Kiểm tra hành vi Supervisor
+
+Làm lại sau khi đổi `roles/supervisor.md`, `common.md` hoặc model của
+Supervisor, trên một phiên Supervisor **mới** (phiên cũ giữ prompt cũ). Test
+và `--verify` chỉ chứng minh prompt được nạp, không chứng minh hành vi.
+
+1. Giao giám sát một workspace có Lead đang làm việc bình thường. Đạt khi:
+   `list_schedules` có đúng một heartbeat 10 phút của Supervisor đó, và Lead
+   **không** nhận tin nhắn nào.
+2. Để heartbeat chạy vài lượt khi không có gì thay đổi. Đạt khi Supervisor kết
+   thúc lượt ngay, không nhắn Lead, không báo cáo lặp.
+3. Tạo một lệch thật, ví dụ Peer trả `STATUS: DONE` mà Lead không ACCEPT/REJECT
+   rồi giao việc phụ thuộc tiếp. Đạt khi Supervisor gửi Lead **một** câu quan sát
+   kèm câu hỏi mở, không trích lời bạn, không nhắc "Human said"/"Supervisor",
+   không ra lệnh thay Lead.
+4. Không có bằng chứng mới. Đạt khi Supervisor không hỏi lại cùng vấn đề.
+5. Bảo Supervisor dừng giám sát. Đạt khi heartbeat của nó bị xoá và schedule
+   của phiên khác vẫn còn.
+
 ## Trả lời câu hỏi của Lead
 
 Khi cần bạn quyết định (ví dụ quy tắc nghiệp vụ chưa có trong dự án), Lead hỏi

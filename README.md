@@ -54,6 +54,9 @@ paseo daemon reload
 ./install --verify      # phải kết thúc bằng VERIFY_OK
 ```
 
+`--verify` kiểm tra cả file đã cài lẫn daemon đang chạy: daemon phải phục vụ ba
+provider `claude-*`. Daemon đang tắt có chủ đích thì dùng `--verify --offline`.
+
 Trên Windows (PowerShell), clone vào một thư mục thường rồi chạy:
 
 ```powershell
@@ -192,7 +195,7 @@ cho việc nhỏ và rõ ràng để tiết kiệm usage.
 
 | Hiện tượng | Kiểm tra |
 | --- | --- |
-| Không thấy provider `claude-*` | `paseo daemon reload`; `./install --verify` |
+| Không thấy provider `claude-*`, hoặc verify báo `daemon serves claude-*` FAIL | `paseo daemon reload` (thêm `--host` nếu cần), đợi vài giây rồi `./install --verify` |
 | Agent lỗi ngay khi khởi chạy | Chạy `claude-room lead -p "role?"` trong terminal; xem `claude` có trong `PATH` không, hoặc đặt `CLAUDE_BIN` |
 | Lead không có tool Paseo | `daemon.mcp.injectIntoAgents` phải là `true` |
 | Peer gọi được tool Paseo | `paseoTools.enabled` của `claude-peer` phải là `false` |
