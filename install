@@ -33,6 +33,7 @@ FILES = (
     (".config/claude-room/common.md", 0o644),
     (".config/claude-room/launch.json", 0o644),
     (".config/claude-room/WORKSPACE_PROTOCOL.md", 0o644),
+    (".config/claude-room/onboard-project.md", 0o644),
     *((f".config/claude-room/roles/{role}.md", 0o644) for role in ROLES),
     (".claude/skills/room-onboard-project/SKILL.md", 0o644),
 )

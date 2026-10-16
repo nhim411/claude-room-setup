@@ -191,6 +191,11 @@ class ContractTests(unittest.TestCase):
         room = ROOT / "home/.config/claude-room"
         self.assertIn("settings.modeId", (room / "common.md").read_text())
         self.assertIn("settings.modeId", (room / "roles/lead.md").read_text())
+        procedure = "~/.config/claude-room/onboard-project.md"
+        self.assertTrue((room / "onboard-project.md").is_file())
+        self.assertIn(procedure, (room / "roles/lead.md").read_text())
+        skill = ROOT / "home/.claude/skills/room-onboard-project/SKILL.md"
+        self.assertIn(procedure, skill.read_text())
         for path in [*ROOT.joinpath("home").rglob("*"), ROOT / "paseo/providers.json"]:
             if path.is_file() and "__pycache__" not in path.parts:
                 self.assertNotIn("codex", path.read_text().lower(), path)

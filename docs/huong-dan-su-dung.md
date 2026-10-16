@@ -44,31 +44,34 @@ không push, nghiệm thu bằng test + chạy lại màn hình". Không nên gi
 Mỗi dự án chỉ cần làm một lần, trước khi giao việc đầu tiên cho Lead.
 
 1. Mở dự án trong Paseo (hoặc `cd` vào repo), tạo agent **Claude Lead** hoặc
-   `claude` thường, rồi gõ:
+   `claude` thường, rồi chạy onboarding theo một trong ba cách sau. Cả ba đều
+   làm theo cùng một quy trình (`home/.config/claude-room/onboard-project.md`).
 
-   ```text
-   /room-onboard-project
-   ```
+   | Máy của bạn | Cách chạy |
+   | --- | --- |
+   | Đã cài phòng, có skill | `/room-onboard-project` |
+   | Đã cài phòng, không thấy skill (ví dụ seat không nạp skill của user) | `Làm theo ~/.config/claude-room/onboard-project.md cho dự án này` |
+   | Chưa cài phòng | `Đọc và làm theo https://raw.githubusercontent.com/nhim411/claude-room-setup/main/home/.config/claude-room/onboard-project.md cho dự án này` |
 
-   Nếu bạn quên bước này, Lead cũng tự chạy skill khi thấy dự án chưa có
-   `docs/WORKSPACE_PROTOCOL.md`.
-2. Skill đọc `CLAUDE.md`, skill, Makefile/package.json, CI, quy ước branch của
+   Lead không cần skill: khi thấy dự án chưa có `docs/WORKSPACE_PROTOCOL.md`,
+   Lead tự đọc file quy trình trên và chạy onboarding.
+2. Onboarding đọc `CLAUDE.md`, skill, Makefile/package.json, CI, quy ước branch của
    dự án, rồi soạn `docs/WORKSPACE_PROTOCOL.md` khoảng 25-40 dòng. Mục nào không
    xác nhận được sẽ ghi `unverified`, không đoán.
 3. Đọc bản nháp và trả lời: sửa mục nào, mục `unverified` nào cần bạn điền.
    Lead chỉ bắt đầu giao việc sau khi bạn duyệt.
-4. File này mặc định chỉ nằm trên máy bạn: skill thêm nó vào
+4. File này mặc định chỉ nằm trên máy bạn: onboarding thêm nó vào
    `.git/info/exclude`, không sửa `.gitignore` và không commit. Muốn chia sẻ cho
    cả nhóm thì bạn tự commit.
 
-Chạy lại `/room-onboard-project` khi dự án đổi lệnh build/test, CI hoặc quy ước
-branch. Khi file đã có, skill chỉ đề xuất phần cần sửa, không viết lại.
+Chạy lại onboarding khi dự án đổi lệnh build/test, CI hoặc quy ước
+branch. Khi file đã có, onboarding chỉ đề xuất phần cần sửa, không viết lại.
 
 ## Ví dụ: dự án `shop`
 
 ### 1. Chuẩn bị một lần
 
-Chạy `/room-onboard-project` trong `~/workspace/shop` (xem mục Onboarding).
+Chạy onboarding trong `~/workspace/shop` (xem mục Onboarding).
 Sau khi bạn duyệt, `~/workspace/shop/docs/WORKSPACE_PROTOCOL.md` có dạng như
 sau (file này chỉ bổ sung chi tiết, không thay đổi quyền của các vai trò):
 

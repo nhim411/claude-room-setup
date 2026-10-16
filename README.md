@@ -61,7 +61,8 @@ Gỡ cài đặt: `./install --uninstall` để xem kế hoạch, rồi thêm `-
 Chế độ quyền được chọn cho từng agent trong Paseo. Phòng chạy không người trông
 cần mode bypass. Nếu muốn duyệt từng lệnh, chọn mode mặc định.
 
-Lần đầu mở một dự án, chạy `/room-onboard-project` để tạo
+Lần đầu mở một dự án, chạy onboarding (`/room-onboard-project`, hoặc nhờ agent
+làm theo `~/.config/claude-room/onboard-project.md` khi máy không có skill) để tạo
 `docs/WORKSPACE_PROTOCOL.md` (lệnh nghiệm thu, worktree, tài nguyên dùng chung,
 việc cần Human duyệt) và duyệt bản nháp trước khi giao việc cho Lead. File này
 được thêm chi tiết nhưng không được đổi quyền của các vai trò.
@@ -78,6 +79,7 @@ Hướng dẫn chi tiết và ví dụ áp dụng cho một dự án thật: [do
 | Ghi chú chung cho mọi seat | `home/.config/claude-room/common.md` | `./install --apply` |
 | Phần ngữ cảnh nền mỗi seat nạp | `home/.config/claude-room/launch.json` | `./install --apply` |
 | Hợp đồng chung của workspace | `home/.config/claude-room/WORKSPACE_PROTOCOL.md` | `./install --apply` |
+| Quy trình onboarding dự án | `home/.config/claude-room/onboard-project.md` | `./install --apply` |
 
 Model mặc định và các lựa chọn khác (chọn khi tạo agent hoặc trong
 agent profile của Paseo):
