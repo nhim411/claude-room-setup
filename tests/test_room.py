@@ -191,6 +191,10 @@ class ContractTests(unittest.TestCase):
         room = ROOT / "home/.config/claude-room"
         self.assertIn("settings.modeId", (room / "common.md").read_text())
         self.assertIn("settings.modeId", (room / "roles/lead.md").read_text())
+        self.assertEqual((ROOT / "CLAUDE.md").read_text().strip(), "@AGENTS.md")
+        guide = (ROOT / "AGENTS.md").read_text()
+        for command in ("./install --apply", "paseo daemon reload", "./install --verify", "onboard-project.md"):
+            self.assertIn(command, guide)
         procedure = "~/.config/claude-room/onboard-project.md"
         self.assertTrue((room / "onboard-project.md").is_file())
         self.assertIn(procedure, (room / "roles/lead.md").read_text())

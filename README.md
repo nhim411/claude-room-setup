@@ -22,6 +22,18 @@ Paseo provider claude-<role>
 Human luôn giữ quyền quyết định về mục tiêu sản phẩm, ưu tiên, chi phí, tác
 động ra bên ngoài (push, deploy, gửi tin) và rủi ro không đảo ngược được.
 
+## Cài nhanh bằng AI agent
+
+Mở Claude Code (hoặc agent khác) trên máy cần cài, rồi gửi:
+
+```text
+Cài Claude Room cho máy này theo https://github.com/nhim411/claude-room-setup (làm theo AGENTS.md).
+```
+
+Agent sẽ kiểm tra yêu cầu, cho bạn xem kế hoạch cài, chỉ cài khi bạn đồng ý,
+rồi chạy kiểm tra. Hướng dẫn cho agent nằm trong [AGENTS.md](AGENTS.md)
+(`CLAUDE.md` trỏ tới file này). Muốn tự cài thì làm theo các mục dưới đây.
+
 ## Yêu cầu
 
 - Claude Code đã đăng nhập (`claude auth status`).
