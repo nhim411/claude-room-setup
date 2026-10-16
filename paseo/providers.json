@@ -1,0 +1,327 @@
+{
+  "claude-supervisor": {
+    "extends": "claude",
+    "label": "Claude Supervisor",
+    "description": "Portfolio governance seat on Claude Code with the Claude Room contract",
+    "command": [
+      "@@HOME@@/.local/bin/claude-room",
+      "supervisor"
+    ],
+    "models": [
+      {
+        "id": "claude-opus-5-5",
+        "label": "Opus 5.5",
+        "thinkingOptions": [
+          {
+            "id": "low",
+            "label": "Low",
+            "isDefault": true
+          },
+          {
+            "id": "medium",
+            "label": "Medium"
+          }
+        ],
+        "isDefault": true
+      },
+      {
+        "id": "claude-sonnet-5-5",
+        "label": "Sonnet 5.5",
+        "thinkingOptions": [
+          {
+            "id": "low",
+            "label": "Low",
+            "isDefault": true
+          },
+          {
+            "id": "medium",
+            "label": "Medium"
+          }
+        ]
+      }
+    ],
+    "disallowedTools": [
+      "Agent",
+      "Task"
+    ],
+    "paseoTools": {
+      "enabled": true
+    }
+  },
+  "claude-lead": {
+    "extends": "claude",
+    "label": "Claude Lead",
+    "description": "Project technical authority on Claude Code with the Claude Room contract",
+    "command": [
+      "@@HOME@@/.local/bin/claude-room",
+      "lead"
+    ],
+    "models": [
+      {
+        "id": "claude-opus-5-5",
+        "label": "Opus 5.5",
+        "thinkingOptions": [
+          {
+            "id": "medium",
+            "label": "Medium",
+            "isDefault": true
+          },
+          {
+            "id": "low",
+            "label": "Low"
+          },
+          {
+            "id": "high",
+            "label": "High"
+          },
+          {
+            "id": "xhigh",
+            "label": "Extra High"
+          },
+          {
+            "id": "max",
+            "label": "Max"
+          }
+        ],
+        "isDefault": true
+      },
+      {
+        "id": "claude-fable-5-1",
+        "label": "Fable 5.1",
+        "thinkingOptions": [
+          {
+            "id": "high",
+            "label": "High",
+            "isDefault": true
+          },
+          {
+            "id": "xhigh",
+            "label": "Extra High"
+          }
+        ]
+      },
+      {
+        "id": "claude-sonnet-5-5",
+        "label": "Sonnet 5.5",
+        "thinkingOptions": [
+          {
+            "id": "high",
+            "label": "High",
+            "isDefault": true
+          },
+          {
+            "id": "medium",
+            "label": "Medium"
+          }
+        ]
+      }
+    ],
+    "disallowedTools": [
+      "Agent",
+      "Task",
+      "mcp__claude_ai_Microsoft_365__outlook_batch_delete_messages",
+      "mcp__claude_ai_Microsoft_365__outlook_batch_modify_labels",
+      "mcp__claude_ai_Microsoft_365__outlook_create_draft",
+      "mcp__claude_ai_Microsoft_365__outlook_create_event",
+      "mcp__claude_ai_Microsoft_365__outlook_create_filter",
+      "mcp__claude_ai_Microsoft_365__outlook_create_label",
+      "mcp__claude_ai_Microsoft_365__outlook_create_reply_all_draft",
+      "mcp__claude_ai_Microsoft_365__outlook_create_reply_draft",
+      "mcp__claude_ai_Microsoft_365__outlook_delete_draft",
+      "mcp__claude_ai_Microsoft_365__outlook_delete_event",
+      "mcp__claude_ai_Microsoft_365__outlook_delete_filter",
+      "mcp__claude_ai_Microsoft_365__outlook_delete_label",
+      "mcp__claude_ai_Microsoft_365__outlook_forward_mail",
+      "mcp__claude_ai_Microsoft_365__outlook_modify_labels",
+      "mcp__claude_ai_Microsoft_365__outlook_modify_thread_labels",
+      "mcp__claude_ai_Microsoft_365__outlook_respond_to_event",
+      "mcp__claude_ai_Microsoft_365__outlook_send_draft",
+      "mcp__claude_ai_Microsoft_365__outlook_send_mail",
+      "mcp__claude_ai_Microsoft_365__outlook_set_vacation",
+      "mcp__claude_ai_Microsoft_365__outlook_trash_thread",
+      "mcp__claude_ai_Microsoft_365__outlook_untrash_thread",
+      "mcp__claude_ai_Microsoft_365__outlook_update_draft",
+      "mcp__claude_ai_Microsoft_365__outlook_update_event",
+      "mcp__claude_ai_Microsoft_365__outlook_update_label",
+      "mcp__claude_ai_Microsoft_365__sharepoint_copy_item",
+      "mcp__claude_ai_Microsoft_365__sharepoint_create_folder",
+      "mcp__claude_ai_Microsoft_365__sharepoint_delete_item",
+      "mcp__claude_ai_Microsoft_365__sharepoint_move_item",
+      "mcp__claude_ai_Microsoft_365__sharepoint_rename_item",
+      "mcp__claude_ai_Microsoft_365__sharepoint_update_file",
+      "mcp__claude_ai_Microsoft_365__sharepoint_upload_file",
+      "mcp__claude_ai_Microsoft_365__teams_create_chat",
+      "mcp__claude_ai_Microsoft_365__teams_reply_channel_message",
+      "mcp__claude_ai_Microsoft_365__teams_send_channel_message",
+      "mcp__claude_ai_Microsoft_365__teams_send_chat_message",
+      "mcp__claude_ai_Notion__notion-convert-page-to-skill",
+      "mcp__claude_ai_Notion__notion-create-attachment",
+      "mcp__claude_ai_Notion__notion-create-comment",
+      "mcp__claude_ai_Notion__notion-create-database",
+      "mcp__claude_ai_Notion__notion-create-file-upload",
+      "mcp__claude_ai_Notion__notion-create-folder",
+      "mcp__claude_ai_Notion__notion-create-pages",
+      "mcp__claude_ai_Notion__notion-create-view",
+      "mcp__claude_ai_Notion__notion-delete-comment",
+      "mcp__claude_ai_Notion__notion-delete-databases",
+      "mcp__claude_ai_Notion__notion-delete-pages",
+      "mcp__claude_ai_Notion__notion-duplicate-page",
+      "mcp__claude_ai_Notion__notion-move-pages",
+      "mcp__claude_ai_Notion__notion-restore-pages",
+      "mcp__claude_ai_Notion__notion-send-message-to-session",
+      "mcp__claude_ai_Notion__notion-set-comment-reaction",
+      "mcp__claude_ai_Notion__notion-set-discussion-resolved",
+      "mcp__claude_ai_Notion__notion-spawn-session",
+      "mcp__claude_ai_Notion__notion-stop-session",
+      "mcp__claude_ai_Notion__notion-update-comment",
+      "mcp__claude_ai_Notion__notion-update-data-source",
+      "mcp__claude_ai_Notion__notion-update-enabled-skills",
+      "mcp__claude_ai_Notion__notion-update-folder",
+      "mcp__claude_ai_Notion__notion-update-page",
+      "mcp__claude_ai_Notion__notion-update-view",
+      "mcp__claude_ai_Notion__notion-upload-skill"
+    ],
+    "paseoTools": {
+      "enabled": true
+    }
+  },
+  "claude-peer": {
+    "extends": "claude",
+    "label": "Claude Peer",
+    "description": "Bounded engineering seat on Claude Code without Paseo orchestration tools",
+    "command": [
+      "@@HOME@@/.local/bin/claude-room",
+      "peer"
+    ],
+    "models": [
+      {
+        "id": "claude-sonnet-5-5",
+        "label": "Sonnet 5.5",
+        "thinkingOptions": [
+          {
+            "id": "high",
+            "label": "High",
+            "isDefault": true
+          },
+          {
+            "id": "medium",
+            "label": "Medium"
+          },
+          {
+            "id": "low",
+            "label": "Low"
+          },
+          {
+            "id": "xhigh",
+            "label": "Extra High"
+          }
+        ],
+        "isDefault": true
+      },
+      {
+        "id": "claude-opus-5-5",
+        "label": "Opus 5.5",
+        "thinkingOptions": [
+          {
+            "id": "high",
+            "label": "High",
+            "isDefault": true
+          },
+          {
+            "id": "medium",
+            "label": "Medium"
+          },
+          {
+            "id": "xhigh",
+            "label": "Extra High"
+          },
+          {
+            "id": "max",
+            "label": "Max"
+          }
+        ]
+      },
+      {
+        "id": "claude-fable-5-1",
+        "label": "Fable 5.1",
+        "thinkingOptions": [
+          {
+            "id": "high",
+            "label": "High",
+            "isDefault": true
+          },
+          {
+            "id": "xhigh",
+            "label": "Extra High"
+          }
+        ]
+      }
+    ],
+    "paseoTools": {
+      "enabled": false
+    },
+    "disallowedTools": [
+      "mcp__claude_ai_Microsoft_365__outlook_batch_delete_messages",
+      "mcp__claude_ai_Microsoft_365__outlook_batch_modify_labels",
+      "mcp__claude_ai_Microsoft_365__outlook_create_draft",
+      "mcp__claude_ai_Microsoft_365__outlook_create_event",
+      "mcp__claude_ai_Microsoft_365__outlook_create_filter",
+      "mcp__claude_ai_Microsoft_365__outlook_create_label",
+      "mcp__claude_ai_Microsoft_365__outlook_create_reply_all_draft",
+      "mcp__claude_ai_Microsoft_365__outlook_create_reply_draft",
+      "mcp__claude_ai_Microsoft_365__outlook_delete_draft",
+      "mcp__claude_ai_Microsoft_365__outlook_delete_event",
+      "mcp__claude_ai_Microsoft_365__outlook_delete_filter",
+      "mcp__claude_ai_Microsoft_365__outlook_delete_label",
+      "mcp__claude_ai_Microsoft_365__outlook_forward_mail",
+      "mcp__claude_ai_Microsoft_365__outlook_modify_labels",
+      "mcp__claude_ai_Microsoft_365__outlook_modify_thread_labels",
+      "mcp__claude_ai_Microsoft_365__outlook_respond_to_event",
+      "mcp__claude_ai_Microsoft_365__outlook_send_draft",
+      "mcp__claude_ai_Microsoft_365__outlook_send_mail",
+      "mcp__claude_ai_Microsoft_365__outlook_set_vacation",
+      "mcp__claude_ai_Microsoft_365__outlook_trash_thread",
+      "mcp__claude_ai_Microsoft_365__outlook_untrash_thread",
+      "mcp__claude_ai_Microsoft_365__outlook_update_draft",
+      "mcp__claude_ai_Microsoft_365__outlook_update_event",
+      "mcp__claude_ai_Microsoft_365__outlook_update_label",
+      "mcp__claude_ai_Microsoft_365__sharepoint_copy_item",
+      "mcp__claude_ai_Microsoft_365__sharepoint_create_folder",
+      "mcp__claude_ai_Microsoft_365__sharepoint_delete_item",
+      "mcp__claude_ai_Microsoft_365__sharepoint_move_item",
+      "mcp__claude_ai_Microsoft_365__sharepoint_rename_item",
+      "mcp__claude_ai_Microsoft_365__sharepoint_update_file",
+      "mcp__claude_ai_Microsoft_365__sharepoint_upload_file",
+      "mcp__claude_ai_Microsoft_365__teams_create_chat",
+      "mcp__claude_ai_Microsoft_365__teams_reply_channel_message",
+      "mcp__claude_ai_Microsoft_365__teams_send_channel_message",
+      "mcp__claude_ai_Microsoft_365__teams_send_chat_message",
+      "mcp__claude_ai_Notion__notion-convert-page-to-skill",
+      "mcp__claude_ai_Notion__notion-create-attachment",
+      "mcp__claude_ai_Notion__notion-create-comment",
+      "mcp__claude_ai_Notion__notion-create-database",
+      "mcp__claude_ai_Notion__notion-create-file-upload",
+      "mcp__claude_ai_Notion__notion-create-folder",
+      "mcp__claude_ai_Notion__notion-create-pages",
+      "mcp__claude_ai_Notion__notion-create-view",
+      "mcp__claude_ai_Notion__notion-delete-comment",
+      "mcp__claude_ai_Notion__notion-delete-databases",
+      "mcp__claude_ai_Notion__notion-delete-pages",
+      "mcp__claude_ai_Notion__notion-duplicate-page",
+      "mcp__claude_ai_Notion__notion-move-pages",
+      "mcp__claude_ai_Notion__notion-restore-pages",
+      "mcp__claude_ai_Notion__notion-send-message-to-session",
+      "mcp__claude_ai_Notion__notion-set-comment-reaction",
+      "mcp__claude_ai_Notion__notion-set-discussion-resolved",
+      "mcp__claude_ai_Notion__notion-spawn-session",
+      "mcp__claude_ai_Notion__notion-stop-session",
+      "mcp__claude_ai_Notion__notion-update-comment",
+      "mcp__claude_ai_Notion__notion-update-data-source",
+      "mcp__claude_ai_Notion__notion-update-enabled-skills",
+      "mcp__claude_ai_Notion__notion-update-folder",
+      "mcp__claude_ai_Notion__notion-update-page",
+      "mcp__claude_ai_Notion__notion-update-view",
+      "mcp__claude_ai_Notion__notion-upload-skill"
+    ]
+  }
+}

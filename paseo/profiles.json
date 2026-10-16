@@ -1,0 +1,29 @@
+[
+  {
+    "id": "claude-room-supervisor",
+    "name": "Room Supervisor",
+    "provider": "claude-supervisor",
+    "model": "claude-opus-5-5",
+    "modeId": "auto",
+    "thinkingOptionId": "medium",
+    "notes": "Portfolio governance across projects: prioritise, assign work to project Leads, track status. Does not write code."
+  },
+  {
+    "id": "claude-room-lead",
+    "name": "Room Lead",
+    "provider": "claude-lead",
+    "model": "claude-opus-5-5",
+    "modeId": "auto",
+    "thinkingOptionId": "high",
+    "notes": "Technical authority for one project: plan, split work into bounded tasks, delegate to Room Peer agents, review and integrate their results."
+  },
+  {
+    "id": "claude-room-peer",
+    "name": "Room Peer",
+    "provider": "claude-peer",
+    "model": "claude-sonnet-5-5",
+    "modeId": "auto",
+    "thinkingOptionId": "high",
+    "notes": "Bounded engineering task handed out by a Lead: implement, test or investigate one scoped change. Cannot launch other agents."
+  }
+]

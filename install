@@ -1,0 +1,240 @@
+#!/usr/bin/env python3
+"""Install, verify or remove the Claude Room seats in an existing Paseo.
+
+  ./install              print the plan, change nothing
+  ./install --apply      copy role files, merge claude-<role> providers and profiles
+  ./install --verify     check installed files and provider policy
+  ./install --uninstall  remove the providers, profiles and installed files (with --apply)
+
+Every file that is replaced or removed is backed up first as
+`<name>.claude-room-<timestamp>.bak`. Other providers and daemon settings in
+~/.paseo/config.json are left as the operator had them.
+"""
+
+from __future__ import annotations
+
+import argparse
+import filecmp
+import json
+import os
+from pathlib import Path
+import shutil
+import sys
+import time
+
+
+ROOT = Path(__file__).resolve().parent
+MIRROR = ROOT / "home"
+ROLES = ("supervisor", "lead", "peer")
+PROVIDERS = tuple(f"claude-{role}" for role in ROLES)
+ORCHESTRATORS = {"claude-supervisor", "claude-lead"}
+FILES = (
+    (".local/bin/claude-room", 0o755),
+    (".config/claude-room/common.md", 0o644),
+    (".config/claude-room/launch.json", 0o644),
+    (".config/claude-room/WORKSPACE_PROTOCOL.md", 0o644),
+    *((f".config/claude-room/roles/{role}.md", 0o644) for role in ROLES),
+    (".claude/skills/room-onboard-project/SKILL.md", 0o644),
+)
+
+
+def target_home() -> Path:
+    return Path(os.environ.get("CLAUDE_ROOM_TARGET_HOME", str(Path.home()))).expanduser()
+
+
+def fail(message: str) -> int:
+    print(f"ERROR: {message}", file=sys.stderr)
+    return 1
+
+
+def source_providers(home: Path) -> dict:
+    text = (ROOT / "paseo/providers.json").read_text().replace("@@HOME@@", str(home))
+    return json.loads(text)
+
+
+def source_profiles() -> list:
+    return json.loads((ROOT / "paseo/profiles.json").read_text())
+
+
+PROFILE_IDS = tuple(profile["id"] for profile in source_profiles())
+
+
+def load_config(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        config = json.loads(path.read_text())
+    except (OSError, ValueError) as error:
+        raise SystemExit(f"ERROR: cannot parse {path} ({type(error).__name__}); nothing was changed")
+    if not isinstance(config, dict):
+        raise SystemExit(f"ERROR: {path} is not a JSON object; nothing was changed")
+    return config
+
+
+def backup(path: Path, stamp: str) -> None:
+    saved = path.with_name(f"{path.name}.claude-room-{stamp}.bak")
+    shutil.copy2(path, saved)
+    print(f"backup  {saved}")
+
+
+def write_private(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + ".claude-room.tmp")
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(descriptor, "w") as stream:
+        stream.write(content)
+    os.replace(temporary, path)
+
+
+def plan_install(home: Path, config: dict) -> tuple[list, dict]:
+    copies = []
+    for relative, mode in FILES:
+        source, target = MIRROR / relative, home / relative
+        if target.exists() and filecmp.cmp(source, target, shallow=False):
+            print(f"same    {target}")
+            continue
+        verb = "replace" if target.exists() else "create"
+        print(f"{verb:<7} {target}")
+        copies.append((verb, source, target, mode))
+
+    merged = json.loads(json.dumps(config))
+    providers = merged.setdefault("agents", {}).setdefault("providers", {})
+    for name, provider in source_providers(home).items():
+        if name not in providers:
+            print(f"add     provider {name}")
+        elif providers[name] != provider:
+            print(f"replace provider {name} (operator edits to it are overwritten; backup kept)")
+        providers[name] = provider
+    profiles = merged.setdefault("daemon", {}).setdefault("agentProfiles", [])
+    for profile in source_profiles():
+        index = next((i for i, item in enumerate(profiles) if item.get("id") == profile["id"]), None)
+        if index is None:
+            print(f"add     profile {profile['name']}")
+            profiles.append(profile)
+        elif profiles[index] != profile:
+            print(f"replace profile {profile['name']} (operator edits to it are overwritten; backup kept)")
+            profiles[index] = profile
+    mcp = merged["daemon"].setdefault("mcp", {})
+    if "injectIntoAgents" not in mcp:
+        mcp["injectIntoAgents"] = True
+        print("set     daemon.mcp.injectIntoAgents = true")
+    elif mcp["injectIntoAgents"] is not True:
+        print("WARN    daemon.mcp.injectIntoAgents is false: Supervisor/Lead will lack Paseo tools (left unchanged)")
+    return copies, merged
+
+
+def install(home: Path, apply: bool) -> int:
+    config_path = home / ".paseo/config.json"
+    config = load_config(config_path)
+    if not shutil.which("claude") and not os.environ.get("CLAUDE_BIN"):
+        print("WARN    claude is not on PATH; Paseo cannot launch the seats until it is")
+    copies, merged = plan_install(home, config)
+    if not apply:
+        print("PLAN_ONLY: rerun with --apply")
+        return 0
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    # Config first: if a later copy fails, rerunning --apply converges.
+    if merged != config:
+        if config_path.exists():
+            backup(config_path, stamp)
+        write_private(config_path, json.dumps(merged, indent=2, ensure_ascii=False) + "\n")
+    for verb, source, target, mode in copies:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if verb == "replace":
+            backup(target, stamp)
+        shutil.copyfile(source, target)
+        target.chmod(mode)
+    print("INSTALL_OK: run `paseo daemon reload`, then `./install --verify`")
+    return 0
+
+
+def uninstall(home: Path, apply: bool) -> int:
+    config_path = home / ".paseo/config.json"
+    config = load_config(config_path)
+    providers = config.get("agents", {}).get("providers", {})
+    present = [name for name in PROVIDERS if name in providers]
+    profiles = config.get("daemon", {}).get("agentProfiles", [])
+    kept = [profile for profile in profiles if profile.get("id") not in PROFILE_IDS]
+    files = [home / relative for relative, _ in FILES if (home / relative).exists()]
+    for name in present:
+        print(f"remove  provider {name}")
+    for profile in profiles:
+        if profile.get("id") in PROFILE_IDS:
+            print(f"remove  profile {profile.get('name')}")
+    for path in files:
+        print(f"remove  {path}")
+    if not apply:
+        print("PLAN_ONLY: rerun with --uninstall --apply")
+        return 0
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    if present or len(kept) != len(profiles):
+        backup(config_path, stamp)
+        for name in present:
+            del providers[name]
+        if len(kept) != len(profiles):
+            config["daemon"]["agentProfiles"] = kept
+        write_private(config_path, json.dumps(config, indent=2, ensure_ascii=False) + "\n")
+    for path in files:
+        backup(path, stamp)
+        path.unlink()
+    skill_dir = home / ".claude/skills/room-onboard-project"
+    if skill_dir.is_dir() and not any(skill_dir.iterdir()):
+        skill_dir.rmdir()
+    print("UNINSTALL_OK: run `paseo daemon reload`")
+    return 0
+
+
+def verify(home: Path) -> int:
+    failures = 0
+
+    def check(label: str, ok: bool) -> None:
+        nonlocal failures
+        print(f"{'OK  ' if ok else 'FAIL'}  {label}")
+        failures += 0 if ok else 1
+
+    for relative, _ in FILES:
+        target = home / relative
+        check(f"{relative} matches repository",
+              target.exists() and filecmp.cmp(MIRROR / relative, target, shallow=False))
+    check("claude-room is executable", os.access(home / ".local/bin/claude-room", os.X_OK))
+    check("claude on PATH", bool(shutil.which("claude") or os.environ.get("CLAUDE_BIN")))
+    config = load_config(home / ".paseo/config.json")
+    providers = config.get("agents", {}).get("providers", {})
+    for name in PROVIDERS:
+        provider = providers.get(name, {})
+        check(f"{name} launches claude-room",
+              provider.get("extends") == "claude"
+              and provider.get("command") == [str(home / ".local/bin/claude-room"), name.split("-", 1)[1]])
+        check(f"{name} native subagents {'blocked' if name in ORCHESTRATORS else 'allowed for research'}",
+              ("Agent" in provider.get("disallowedTools", [])) is (name in ORCHESTRATORS))
+        check(f"{name} Paseo tools {'on' if name in ORCHESTRATORS else 'off'}",
+              provider.get("paseoTools", {}).get("enabled") is (name in ORCHESTRATORS))
+        check(f"{name} has exactly one default model",
+              sum(1 for model in provider.get("models", []) if model.get("isDefault")) == 1)
+    profiles = {profile.get("id"): profile for profile in config.get("daemon", {}).get("agentProfiles", [])}
+    for profile in source_profiles():
+        check(f"profile {profile['name']} matches repository", profiles.get(profile["id"]) == profile)
+    check("daemon injects Paseo MCP", config.get("daemon", {}).get("mcp", {}).get("injectIntoAgents") is True)
+    print("VERIFY_OK" if failures == 0 else f"VERIFY_FAILED: {failures} check(s)")
+    return int(failures > 0)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--apply", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--verify", action="store_true")
+    mode.add_argument("--uninstall", action="store_true")
+    args = parser.parse_args()
+    if sys.version_info < (3, 9):
+        return fail("Python 3.9+ is required")
+    home = target_home()
+    if args.verify:
+        return verify(home)
+    if args.uninstall:
+        return uninstall(home, args.apply)
+    return install(home, args.apply)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

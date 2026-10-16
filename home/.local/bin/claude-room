@@ -1,0 +1,200 @@
+#!/usr/bin/env python3
+"""Launch Claude Code as a Claude Room seat (Supervisor, Lead or Peer).
+
+Paseo's `claude-<role>` providers run `claude-room <role> <claude args>`.
+The role prompt is the role text, the shared room contract and common.md.
+
+- Agent SDK sessions (Paseo) use `--input-format stream-json` and send the
+  system prompt in the `initialize` control request on stdin, which overrides
+  argv prompt flags. The launcher proxies stdin and prepends the role prompt
+  to that request's `appendSystemPrompt`; stdout/stderr go straight to claude.
+- Terminal sessions (`claude-room lead`, `-p`) get the role prompt merged into
+  one `--append-system-prompt` flag.
+- Probes such as `--version` and `auth status` pass through untouched.
+- launch.json trims each seat's base context: `settingSources` replaces the
+  sources Paseo passes (dropping "user" skips user plugins, skills, hooks and
+  CLAUDE.md) and `strictMcpConfig` keeps only MCP servers passed on the
+  command line (Paseo's own server), dropping the operator's other servers.
+
+Nothing is written: auth, skills, hooks and plugins stay in the operator's
+own Claude config. stdout belongs to the SDK stream, so errors go to stderr.
+"""
+
+import json
+import os
+import pathlib
+import shutil
+import signal
+import subprocess
+import sys
+import threading
+
+
+ROLES = ("supervisor", "lead", "peer")
+APPEND_FLAG = "--append-system-prompt"
+APPEND_FILE_FLAG = "--append-system-prompt-file"
+PASSTHROUGH_FLAGS = {"--version", "-v", "--help", "-h"}
+SUBCOMMANDS = {
+    "agents", "auth", "config", "doctor", "install", "mcp", "migrate-installer",
+    "plugin", "plugins", "setup-token", "update", "upgrade",
+}
+
+
+def room_config() -> pathlib.Path:
+    configured = os.environ.get("CLAUDE_ROOM_CONFIG_HOME")
+    if configured:
+        return pathlib.Path(configured).expanduser()
+    return pathlib.Path.home() / ".config" / "claude-room"
+
+
+def read_required(path: pathlib.Path) -> str:
+    try:
+        text = path.read_text().strip()
+    except OSError as error:
+        raise SystemExit(f"claude-room: cannot read {path} ({type(error).__name__})")
+    if not text:
+        raise SystemExit(f"claude-room: empty role file {path}")
+    return text
+
+
+def role_prompt(role: str) -> str:
+    config = room_config()
+    parts = (config / "roles" / f"{role}.md", config / "WORKSPACE_PROTOCOL.md", config / "common.md")
+    return "\n\n".join(read_required(path) for path in parts)
+
+
+def is_probe(args: list[str]) -> bool:
+    if any(arg in PASSTHROUGH_FLAGS for arg in args):
+        return True
+    return bool(args) and args[0] in SUBCOMMANDS
+
+
+def merge_append(args: list[str], prompt: str) -> list[str]:
+    merged: list[str] = []
+    paseo_parts: list[str] = []
+    index = 0
+    while index < len(args):
+        arg = args[index]
+        if arg == APPEND_FLAG:
+            if index + 1 >= len(args):
+                raise SystemExit(f"claude-room: {APPEND_FLAG} is missing its value")
+            paseo_parts.append(args[index + 1])
+            index += 2
+            continue
+        if arg.startswith(APPEND_FLAG + "="):
+            paseo_parts.append(arg.split("=", 1)[1])
+            index += 1
+            continue
+        if arg == APPEND_FILE_FLAG or arg.startswith(APPEND_FILE_FLAG + "="):
+            raise SystemExit(f"claude-room: cannot merge {APPEND_FILE_FLAG}; pass inline text instead")
+        merged.append(arg)
+        index += 1
+    combined = "\n\n".join([prompt, *[part for part in paseo_parts if part.strip()]])
+    return [*merged, APPEND_FLAG, combined]
+
+
+def launch_policy(role: str) -> dict:
+    path = room_config() / "launch.json"
+    if not path.exists():
+        return {}
+    try:
+        policy = json.loads(path.read_text()).get(role, {})
+    except (OSError, ValueError, AttributeError) as error:
+        raise SystemExit(f"claude-room: cannot read {path} ({type(error).__name__})")
+    return policy if isinstance(policy, dict) else {}
+
+
+def apply_policy(args: list[str], policy: dict) -> list[str]:
+    sources = policy.get("settingSources")
+    result: list[str] = []
+    index = 0
+    while index < len(args):
+        arg = args[index]
+        if sources and arg.startswith("--setting-sources="):
+            index += 1
+            continue
+        if sources and arg == "--setting-sources" and index + 1 < len(args):
+            index += 2
+            continue
+        result.append(arg)
+        index += 1
+    if sources:
+        result.append(f"--setting-sources={sources}")
+    if policy.get("strictMcpConfig") and "--strict-mcp-config" not in result:
+        result.append("--strict-mcp-config")
+    return result
+
+
+def is_stream_session(args: list[str]) -> bool:
+    for index, arg in enumerate(args):
+        if arg == "--input-format" and index + 1 < len(args) and args[index + 1] == "stream-json":
+            return True
+        if arg == "--input-format=stream-json":
+            return True
+    return False
+
+
+def inject_initialize(line: bytes, prompt: str) -> bytes:
+    """Prepend the role prompt to an SDK initialize request; pass anything else through."""
+    if b'"initialize"' not in line:
+        return line
+    try:
+        message = json.loads(line)
+    except ValueError:
+        return line
+    request = message.get("request") if isinstance(message, dict) else None
+    if message.get("type") != "control_request" or not isinstance(request, dict) \
+            or request.get("subtype") != "initialize":
+        return line
+    existing = request.get("appendSystemPrompt")
+    request["appendSystemPrompt"] = prompt + ("\n\n" + existing if isinstance(existing, str) and existing.strip() else "")
+    return (json.dumps(message, ensure_ascii=False) + "\n").encode()
+
+
+def proxy(claude_bin: str, args: list[str], prompt: str) -> int:
+    child = subprocess.Popen([claude_bin, *args], stdin=subprocess.PIPE)
+    for signum in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(signum, lambda number, _frame: child.send_signal(number))
+
+    def pump() -> None:
+        injected = False
+        try:
+            for line in sys.stdin.buffer:
+                if not injected:
+                    rewritten = inject_initialize(line, prompt)
+                    injected = rewritten is not line
+                    line = rewritten
+                child.stdin.write(line)
+                child.stdin.flush()
+        except (BrokenPipeError, OSError):
+            pass
+        finally:
+            try:
+                child.stdin.close()
+            except OSError:
+                pass
+
+    threading.Thread(target=pump, daemon=True).start()
+    return child.wait()
+
+
+def main() -> None:
+    if len(sys.argv) < 2 or sys.argv[1] not in ROLES:
+        raise SystemExit(f"usage: claude-room <{'|'.join(ROLES)}> [claude args...]")
+    role, args = sys.argv[1], sys.argv[2:]
+    claude_bin = os.environ.get("CLAUDE_BIN") or shutil.which("claude")
+    if not claude_bin:
+        raise SystemExit("claude-room: claude not found; set CLAUDE_BIN")
+    os.environ["CLAUDE_ROOM_ROLE"] = role
+    if is_probe(args):
+        os.execv(claude_bin, [claude_bin, *args])
+    prompt = role_prompt(role)
+    args = apply_policy(args, launch_policy(role))
+    if is_stream_session(args):
+        code = proxy(claude_bin, args, prompt)
+        sys.exit(code if code >= 0 else 128 - code)
+    os.execv(claude_bin, [claude_bin, *merge_append(args, prompt)])
+
+
+if __name__ == "__main__":
+    main()

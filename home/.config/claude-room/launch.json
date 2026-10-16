@@ -1,0 +1,5 @@
+{
+  "supervisor": {"settingSources": "project,local", "strictMcpConfig": true},
+  "lead": {},
+  "peer": {}
+}
