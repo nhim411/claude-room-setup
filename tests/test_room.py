@@ -189,6 +189,10 @@ class ContractTests(unittest.TestCase):
             self.assertIn(profile["thinkingOptionId"], thinking)
         supervisor = next(profile for profile in profiles if profile["provider"] == "claude-supervisor")
         self.assertEqual((supervisor["model"], supervisor["thinkingOptionId"]), ("claude-opus-5-5", "low"))
+        for profile in profiles:
+            model = next(m for m in providers[profile["provider"]]["models"] if m.get("isDefault"))
+            default = next(o["id"] for o in model["thinkingOptions"] if o.get("isDefault"))
+            self.assertEqual((profile["model"], profile["thinkingOptionId"]), (model["id"], default), profile["name"])
         for name, provider in providers.items():
             self.assertEqual(provider["paseoTools"]["enabled"], name != "claude-peer")
             denied = provider.get("disallowedTools", [])

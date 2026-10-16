@@ -6,7 +6,7 @@
     "model": "claude-opus-5-5",
     "modeId": "auto",
     "thinkingOptionId": "low",
-    "notes": "Portfolio governance across projects: prioritise, assign work to project Leads, track status. Does not write code."
+    "notes": "Watches project workspaces: routes Human intent to Leads, checks Lead -> Peer -> Lead handoffs close, reports drift. Does not assign work or write code."
   },
   {
     "id": "claude-room-lead",

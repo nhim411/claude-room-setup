@@ -116,15 +116,16 @@ agent profile của Paseo):
 | Seat | Mặc định | Lựa chọn khác |
 | --- | --- | --- |
 | Supervisor | Opus 5.5 Low | Opus 5.5 Medium, Sonnet 5.5 Low/Medium |
-| Lead | Opus 5.5 Medium | Opus 5.5 Low/High/Extra High/Max, Fable 5.1 High/Extra High, Sonnet 5.5 High/Medium |
+| Lead | Opus 5.5 High | Opus 5.5 Medium/Low/Extra High/Max, Fable 5.1 High/Extra High, Sonnet 5.5 High/Medium |
 | Peer | Sonnet 5.5 High | Sonnet 5.5 Low/Medium/Extra High, Opus 5.5 Medium/High/Extra High/Max, Fable 5.1 High/Extra High |
 
 Khi nào dùng mức cao (Fable 5.1, Opus Extra High/Max):
 
 - **Supervisor:** không cần. Việc của nó là đọc trạng thái và đối chiếu, Low là đủ;
   lên Medium khi giám sát nhiều workspace hoặc luồng việc rối.
-- **Lead:** Medium cho việc thường ngày. Lên High/Extra High khi chia một epic
-  lớn, thiết kế kiến trúc, hay nghiệm thu thay đổi rủi ro cao (migration, tiền,
+- **Lead:** High làm mặc định để chia việc và nghiệm thu chắc tay. Hạ xuống
+  Medium/Low cho việc nhỏ và rõ ràng; lên Extra High khi chia một epic lớn,
+  thiết kế kiến trúc, hay nghiệm thu thay đổi rủi ro cao (migration, tiền,
   bảo mật). Fable 5.1 hoặc Max chỉ cho phiên lập kế hoạch/quyết định quan trọng,
   không để chạy cả phiên dài vì tốn usage.
 - **Peer:** Lead tự chọn theo từng việc (quy tắc nằm trong prompt của Lead):
@@ -184,7 +185,8 @@ chrome-devtools, Playwright hay skill cá nhân khi làm việc.
 
 Thử nghiệm A/B (cùng task, chấm bằng 9 test ẩn): Lead Opus Low và Lead Opus
 Medium đều đạt 9/9, usage và thời gian gần như bằng nhau. Mặc định của Lead
-vẫn là Medium; chọn Low cho việc nhỏ và rõ ràng.
+là High để có biên an toàn khi chia việc và nghiệm thu; chọn Medium hoặc Low
+cho việc nhỏ và rõ ràng để tiết kiệm usage.
 
 ## Gỡ lỗi
 
