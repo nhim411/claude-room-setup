@@ -8,6 +8,22 @@ Claude Room adds three Paseo providers (`claude-supervisor`, `claude-lead`,
 `claude-peer`) that launch Claude Code with a role prompt. See README.md for
 what the roles do.
 
+## Pick the target platform first
+
+Install on the machine whose Paseo daemon will run the agents. Paseo Desktop on
+Windows starts its own daemon (`%USERPROFILE%\.paseo`); if the app is connected
+to a WSL host instead, install inside that WSL distro. Ask the user when unsure;
+installing on both is fine.
+
+| Platform | Shell | Run the installer as | Paths below mean |
+| --- | --- | --- | --- |
+| Linux, macOS, WSL | bash/zsh | `./install` | `~` = `$HOME` |
+| Windows (native) | PowerShell | `python install` (or `py -3 install`) | `~` = `%USERPROFILE%` |
+
+On Windows the providers launch `<python.exe> %USERPROFILE%\.local\bin\claude-room <role>`
+using the exact Python that ran `python install --apply`. If that Python is
+upgraded or removed, run `python install --apply` again.
+
 ## Rules
 
 - `./install --apply` changes files outside this repo: `~/.paseo/config.json`,
@@ -25,12 +41,11 @@ Run each check and stop with a clear message if one fails.
 
 | Check | Command | Fix |
 | --- | --- | --- |
-| Linux, macOS or WSL | `uname -s` | On Windows, install inside the WSL distro the Paseo app connects to |
-| Python 3.9+ | `python3 --version` | Install Python 3 |
+| Python 3.9+ | `python3 --version` (Windows: `python --version`) | Install Python 3; on Windows not the Microsoft Store stub (`python -c "import sys; print(sys.executable)"` must print a real path) |
 | Claude Code logged in | `claude --version && claude auth status` | User runs `claude` and logs in |
 | Paseo CLI | `paseo --version` | `npm i -g @getpaseo/cli`, or Paseo Desktop |
 | Paseo daemon reachable | `paseo daemon status` | If it says not running but the app works, read `daemon.listen` in `~/.paseo/config.json` and add `--host <listen>` to every `paseo` command |
-| `~/.local/bin` on PATH | `echo "$PATH" \| tr : '\n' \| grep -x "$HOME/.local/bin"` | Tell the user which shell profile line to add; do not edit it without consent |
+| `~/.local/bin` on PATH (POSIX only, for terminal use) | `echo "$PATH" \| tr : '\n' \| grep -x "$HOME/.local/bin"` | Tell the user which shell profile line to add; do not edit it without consent. Paseo itself uses absolute paths |
 
 ## 2. Get the code
 
@@ -41,7 +56,9 @@ git clone https://github.com/nhim411/claude-room-setup.git ~/claude-room-setup
 cd ~/claude-room-setup
 ```
 
-Keep the checkout: updates and uninstall run from it.
+Keep the checkout: updates and uninstall run from it. On Windows, use a normal
+local folder (not a `\\wsl$` path) and replace `./install` with `python install`
+in every command below.
 
 ## 3. Plan, confirm, install
 
@@ -69,6 +86,13 @@ paseo provider ls         # claude-supervisor, claude-lead, claude-peer: availab
 claude-room peer -p "Quote the line starting with 'Room role:' from your instructions, or answer ABSENT."
 ```
 
+Windows (PowerShell):
+
+```powershell
+paseo provider ls
+python "$env:USERPROFILE\.local\bin\claude-room" peer -p "Quote the line starting with 'Room role:' from your instructions, or answer ABSENT."
+```
+
 The second command makes one small model request; ask the user first if cost
 matters. It must quote `Room role: Peer.`
 
@@ -90,7 +114,7 @@ Tell the user, briefly:
 ## Update and uninstall
 
 ```bash
-git pull && ./install && ./install --apply && paseo daemon reload && ./install --verify
+git pull && ./install && ./install --apply && paseo daemon reload && ./install --verify   # Windows: python install ...
 ./install --uninstall            # plan
 ./install --uninstall --apply    # removes only Claude Room providers, profiles and files
 ```
@@ -108,11 +132,14 @@ the old ones.
 | Agent fails at launch | Run `claude-room lead -p "role?"`; ensure `claude` is on PATH or set `CLAUDE_BIN` |
 | Lead or Supervisor has no Paseo tools | `daemon.mcp.injectIntoAgents` must be `true` (verify reports it) |
 | `create_agent` fails with "cannot inherit mode" | Pass `settings.modeId` (for example `"auto"`); the role prompts already say so |
-| Paseo app on Windows shows nothing new | The install must happen inside the WSL host the app connects to, then reload |
+| Paseo app on Windows shows nothing new | Install on the host the app is connected to (Windows daemon or WSL), then reload that daemon |
+| Windows: verify says `claude-* launches claude-room` FAIL | The Python recorded in the provider command moved; rerun `python install --apply` |
+| Windows: agent exits at once | Run the PowerShell smoke test above; check `claude` resolves (`where.exe claude`) or set `CLAUDE_BIN` |
 
 ## Working on this repository
 
 - `home/` mirrors files installed under `~`; `paseo/*.json` is merged into
-  `~/.paseo/config.json` (`@@HOME@@` becomes the user's home).
-- Run `make test` after any change. Keep the repo free of private project
+  `~/.paseo/config.json`. The installer sets each provider's `command` per OS.
+- Run `make test` after any change (Windows: `python -m unittest discover -s tests`;
+  launcher tests skip there, so also run the PowerShell smoke test). Keep the repo free of private project
   names, internal URLs and personal data: it is public.

@@ -3,10 +3,6 @@
     "extends": "claude",
     "label": "Claude Supervisor",
     "description": "Portfolio governance seat on Claude Code with the Claude Room contract",
-    "command": [
-      "@@HOME@@/.local/bin/claude-room",
-      "supervisor"
-    ],
     "models": [
       {
         "id": "claude-opus-5-5",
@@ -52,10 +48,6 @@
     "extends": "claude",
     "label": "Claude Lead",
     "description": "Project technical authority on Claude Code with the Claude Room contract",
-    "command": [
-      "@@HOME@@/.local/bin/claude-room",
-      "lead"
-    ],
     "models": [
       {
         "id": "claude-opus-5-5",
@@ -189,10 +181,6 @@
     "extends": "claude",
     "label": "Claude Peer",
     "description": "Bounded engineering seat on Claude Code without Paseo orchestration tools",
-    "command": [
-      "@@HOME@@/.local/bin/claude-room",
-      "peer"
-    ],
     "models": [
       {
         "id": "claude-sonnet-5-5",

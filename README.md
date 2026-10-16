@@ -38,7 +38,11 @@ rồi chạy kiểm tra. Hướng dẫn cho agent nằm trong [AGENTS.md](AGENTS
 
 - Claude Code đã đăng nhập (`claude auth status`).
 - Paseo daemon (`npm i -g @getpaseo/cli`, hoặc bản Desktop).
-- Python 3.9+, `~/.local/bin` có trong `PATH`.
+- Python 3.9+. Trên Linux/macOS/WSL nên có `~/.local/bin` trong `PATH` (để gõ
+  `claude-room` trong terminal).
+- Hỗ trợ Linux, macOS, WSL và Windows. Cài trên máy có daemon Paseo sẽ chạy
+  agent: Paseo Desktop trên Windows có daemon riêng (`%USERPROFILE%\.paseo`);
+  nếu app đang nối tới host WSL thì cài trong WSL.
 
 ## Cài đặt
 
@@ -49,6 +53,19 @@ git clone https://github.com/nhim411/claude-room-setup.git && cd claude-room-set
 paseo daemon reload
 ./install --verify      # phải kết thúc bằng VERIFY_OK
 ```
+
+Trên Windows (PowerShell), clone vào một thư mục thường rồi chạy:
+
+```powershell
+python install            # xem kế hoạch
+python install --apply
+paseo daemon reload
+python install --verify   # phải kết thúc bằng VERIFY_OK
+```
+
+Trên Windows, provider chạy `<python.exe> %USERPROFILE%\.local\bin\claude-room <role>`
+bằng đúng Python đã chạy `python install --apply`. Khi nâng cấp hoặc gỡ Python
+đó, chạy lại `python install --apply`.
 
 Installer thêm ba provider `claude-*` và ba agent profile `Room Supervisor/Lead/Peer`
 (`daemon.agentProfiles`, hiện ở mục **Profiles** của model picker) vào
@@ -183,6 +200,9 @@ vẫn là Medium; chọn Low cho việc nhỏ và rõ ràng.
 ```bash
 make test     # unit test cho launcher và installer
 ```
+
+Trên Windows: `python -m unittest discover -s tests`. Test launcher bị bỏ qua
+vì cần script POSIX; kiểm tra launcher bằng lệnh smoke test trong `AGENTS.md`.
 
 ## License
 

@@ -48,13 +48,21 @@ def fail(message: str) -> int:
     return 1
 
 
+def launcher_command(home: Path, role: str) -> list:
+    launcher = str(home / ".local/bin/claude-room")
+    # Windows cannot run a shebang script directly: launch it with this Python.
+    return [sys.executable, launcher, role] if os.name == "nt" else [launcher, role]
+
+
 def source_providers(home: Path) -> dict:
-    text = (ROOT / "paseo/providers.json").read_text().replace("@@HOME@@", str(home))
-    return json.loads(text)
+    providers = json.loads((ROOT / "paseo/providers.json").read_text(encoding="utf-8"))
+    for name, provider in providers.items():
+        provider["command"] = launcher_command(home, name.split("-", 1)[1])
+    return providers
 
 
 def source_profiles() -> list:
-    return json.loads((ROOT / "paseo/profiles.json").read_text())
+    return json.loads((ROOT / "paseo/profiles.json").read_text(encoding="utf-8"))
 
 
 PROFILE_IDS = tuple(profile["id"] for profile in source_profiles())
@@ -64,7 +72,7 @@ def load_config(path: Path) -> dict:
     if not path.exists():
         return {}
     try:
-        config = json.loads(path.read_text())
+        config = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as error:
         raise SystemExit(f"ERROR: cannot parse {path} ({type(error).__name__}); nothing was changed")
     if not isinstance(config, dict):
@@ -82,7 +90,7 @@ def write_private(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + ".claude-room.tmp")
     descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(descriptor, "w") as stream:
+    with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
         stream.write(content)
     os.replace(temporary, path)
 
@@ -203,9 +211,11 @@ def verify(home: Path) -> int:
     providers = config.get("agents", {}).get("providers", {})
     for name in PROVIDERS:
         provider = providers.get(name, {})
+        command = provider.get("command") or []
+        expected = launcher_command(home, name.split("-", 1)[1])
         check(f"{name} launches claude-room",
-              provider.get("extends") == "claude"
-              and provider.get("command") == [str(home / ".local/bin/claude-room"), name.split("-", 1)[1]])
+              provider.get("extends") == "claude" and len(command) == len(expected)
+              and command[-2:] == expected[-2:] and (len(command) == 2 or Path(command[0]).exists()))
         check(f"{name} native subagents {'blocked' if name in ORCHESTRATORS else 'allowed for research'}",
               ("Agent" in provider.get("disallowedTools", [])) is (name in ORCHESTRATORS))
         check(f"{name} Paseo tools {'on' if name in ORCHESTRATORS else 'off'}",

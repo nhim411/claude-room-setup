@@ -20,6 +20,7 @@ FAKE_CLAUDE = (
 )
 
 
+@unittest.skipIf(os.name == "nt", "fake claude binaries are POSIX scripts; see AGENTS.md for the Windows smoke test")
 class LauncherTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
@@ -140,7 +141,11 @@ class InstallerTests(unittest.TestCase):
         profiles = {profile["id"]: profile for profile in config["daemon"]["agentProfiles"]}
         self.assertEqual(profiles["mine"], {"id": "mine", "name": "Mine", "provider": "pi"})
         self.assertEqual(profiles["claude-room-lead"]["provider"], "claude-lead")
-        self.assertEqual(self.config_path.stat().st_mode & 0o777, 0o600)
+        if os.name != "nt":
+            self.assertEqual(self.config_path.stat().st_mode & 0o777, 0o600)
+        launcher = str(self.home / ".local/bin/claude-room")
+        command = config["agents"]["providers"]["claude-lead"]["command"]
+        self.assertEqual(command, [sys.executable, launcher, "lead"] if os.name == "nt" else [launcher, "lead"])
         verified = self.run_installer("--verify")
         self.assertEqual(verified.returncode, 0, verified.stdout)
         self.assertEqual(len(self.backups()), 1)

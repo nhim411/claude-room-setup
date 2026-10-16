@@ -31,6 +31,7 @@ import threading
 
 
 ROLES = ("supervisor", "lead", "peer")
+WINDOWS = os.name == "nt"
 APPEND_FLAG = "--append-system-prompt"
 APPEND_FILE_FLAG = "--append-system-prompt-file"
 PASSTHROUGH_FLAGS = {"--version", "-v", "--help", "-h"}
@@ -49,7 +50,7 @@ def room_config() -> pathlib.Path:
 
 def read_required(path: pathlib.Path) -> str:
     try:
-        text = path.read_text().strip()
+        text = path.read_text(encoding="utf-8").strip()
     except OSError as error:
         raise SystemExit(f"claude-room: cannot read {path} ({type(error).__name__})")
     if not text:
@@ -98,7 +99,7 @@ def launch_policy(role: str) -> dict:
     if not path.exists():
         return {}
     try:
-        policy = json.loads(path.read_text()).get(role, {})
+        policy = json.loads(path.read_text(encoding="utf-8")).get(role, {})
     except (OSError, ValueError, AttributeError) as error:
         raise SystemExit(f"claude-room: cannot read {path} ({type(error).__name__})")
     return policy if isinstance(policy, dict) else {}
@@ -153,8 +154,14 @@ def inject_initialize(line: bytes, prompt: str) -> bytes:
 
 def proxy(claude_bin: str, args: list[str], prompt: str) -> int:
     child = subprocess.Popen([claude_bin, *args], stdin=subprocess.PIPE)
-    for signum in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
-        signal.signal(signum, lambda number, _frame: child.send_signal(number))
+
+    def forward(number: int, _frame) -> None:
+        # Windows cannot deliver SIGINT/SIGHUP to a child; terminate instead.
+        child.terminate() if WINDOWS else child.send_signal(number)
+
+    for name in ("SIGTERM", "SIGINT", "SIGHUP"):
+        if hasattr(signal, name):
+            signal.signal(getattr(signal, name), forward)
 
     def pump() -> None:
         injected = False
@@ -178,6 +185,14 @@ def proxy(claude_bin: str, args: list[str], prompt: str) -> int:
     return child.wait()
 
 
+def run_claude(argv: list[str]) -> None:
+    """Replace this process with claude (POSIX) or run it and mirror its exit code (Windows)."""
+    if WINDOWS:
+        # os.execv on Windows spawns and exits at once, which drops Paseo's stdio.
+        sys.exit(subprocess.call(argv))
+    os.execv(argv[0], argv)
+
+
 def main() -> None:
     if len(sys.argv) < 2 or sys.argv[1] not in ROLES:
         raise SystemExit(f"usage: claude-room <{'|'.join(ROLES)}> [claude args...]")
@@ -187,13 +202,13 @@ def main() -> None:
         raise SystemExit("claude-room: claude not found; set CLAUDE_BIN")
     os.environ["CLAUDE_ROOM_ROLE"] = role
     if is_probe(args):
-        os.execv(claude_bin, [claude_bin, *args])
+        run_claude([claude_bin, *args])
     prompt = role_prompt(role)
     args = apply_policy(args, launch_policy(role))
     if is_stream_session(args):
         code = proxy(claude_bin, args, prompt)
         sys.exit(code if code >= 0 else 128 - code)
-    os.execv(claude_bin, [claude_bin, *merge_append(args, prompt)])
+    run_claude([claude_bin, *merge_append(args, prompt)])
 
 
 if __name__ == "__main__":
