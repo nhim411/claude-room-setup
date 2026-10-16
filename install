@@ -153,7 +153,8 @@ def install(home: Path, apply: bool) -> int:
             backup(target, stamp)
         shutil.copyfile(source, target)
         target.chmod(mode)
-    print("INSTALL_OK: run `paseo daemon reload`, then `./install --verify`")
+    verify_cmd = "python install --verify" if os.name == "nt" else "./install --verify"
+    print(f"INSTALL_OK: run `paseo daemon reload`, then `{verify_cmd}`")
     return 0
 
 
