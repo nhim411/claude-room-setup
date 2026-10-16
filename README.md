@@ -61,8 +61,10 @@ Gỡ cài đặt: `./install --uninstall` để xem kế hoạch, rồi thêm `-
 Chế độ quyền được chọn cho từng agent trong Paseo. Phòng chạy không người trông
 cần mode bypass. Nếu muốn duyệt từng lệnh, chọn mode mặc định.
 
-Mỗi project có thể thêm `docs/WORKSPACE_PROTOCOL.md` để bổ sung quy tắc riêng.
-File này được thêm chi tiết nhưng không được đổi quyền của các vai trò.
+Lần đầu mở một dự án, chạy `/room-onboard-project` để tạo
+`docs/WORKSPACE_PROTOCOL.md` (lệnh nghiệm thu, worktree, tài nguyên dùng chung,
+việc cần Human duyệt) và duyệt bản nháp trước khi giao việc cho Lead. File này
+được thêm chi tiết nhưng không được đổi quyền của các vai trò.
 
 Hướng dẫn chi tiết và ví dụ áp dụng cho một dự án thật: [docs/huong-dan-su-dung.md](docs/huong-dan-su-dung.md).
 

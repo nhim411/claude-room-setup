@@ -23,8 +23,10 @@ Dự án (git repo)  ──>  Workspace Paseo (thư mục làm việc của agen
 
 1. Mở dự án trong Paseo: chọn thư mục repo trong app, hoặc `cd` vào repo rồi tạo
    agent bằng CLI (workspace mặc định là thư mục hiện tại).
-2. (Nên làm) Thêm `docs/WORKSPACE_PROTOCOL.md` vào dự án để ghi các quy tắc
-   riêng: lệnh kiểm tra, quy tắc branch, những việc cần Human duyệt.
+2. **Lần đầu mở dự án: chạy onboarding** (xem mục bên dưới). Bước này tạo
+   `docs/WORKSPACE_PROTOCOL.md` cho dự án, ghi lệnh nghiệm thu, cách tạo
+   worktree, tài nguyên dùng chung và những việc cần Human duyệt. Lead sẽ không
+   giao việc cho Peer khi file này chưa có và chưa được bạn duyệt.
 3. Tạo **Claude Lead** và giao một outcome, không giao danh sách bước.
 4. Lead điều tra repo, chia việc, tạo Peer qua tool Paseo, rồi nghiệm thu từng
    kết quả bằng ACCEPT hoặc REJECT kèm lý do.
@@ -37,12 +39,38 @@ làm, và bằng chứng nghiệm thu. Ví dụ "sửa bug X, được commit tr
 không push, nghiệm thu bằng test + chạy lại màn hình". Không nên giao kiểu
 "đọc file A, sửa hàm B".
 
+## Onboarding dự án lần đầu
+
+Mỗi dự án chỉ cần làm một lần, trước khi giao việc đầu tiên cho Lead.
+
+1. Mở dự án trong Paseo (hoặc `cd` vào repo), tạo agent **Claude Lead** hoặc
+   `claude` thường, rồi gõ:
+
+   ```text
+   /room-onboard-project
+   ```
+
+   Nếu bạn quên bước này, Lead cũng tự chạy skill khi thấy dự án chưa có
+   `docs/WORKSPACE_PROTOCOL.md`.
+2. Skill đọc `CLAUDE.md`, skill, Makefile/package.json, CI, quy ước branch của
+   dự án, rồi soạn `docs/WORKSPACE_PROTOCOL.md` khoảng 25-40 dòng. Mục nào không
+   xác nhận được sẽ ghi `unverified`, không đoán.
+3. Đọc bản nháp và trả lời: sửa mục nào, mục `unverified` nào cần bạn điền.
+   Lead chỉ bắt đầu giao việc sau khi bạn duyệt.
+4. File này mặc định chỉ nằm trên máy bạn: skill thêm nó vào
+   `.git/info/exclude`, không sửa `.gitignore` và không commit. Muốn chia sẻ cho
+   cả nhóm thì bạn tự commit.
+
+Chạy lại `/room-onboard-project` khi dự án đổi lệnh build/test, CI hoặc quy ước
+branch. Khi file đã có, skill chỉ đề xuất phần cần sửa, không viết lại.
+
 ## Ví dụ: dự án `shop`
 
 ### 1. Chuẩn bị một lần
 
-Tạo `~/workspace/shop/docs/WORKSPACE_PROTOCOL.md` (file này chỉ bổ sung chi
-tiết, không thay đổi quyền của các vai trò):
+Chạy `/room-onboard-project` trong `~/workspace/shop` (xem mục Onboarding).
+Sau khi bạn duyệt, `~/workspace/shop/docs/WORKSPACE_PROTOCOL.md` có dạng như
+sau (file này chỉ bổ sung chi tiết, không thay đổi quyền của các vai trò):
 
 ```markdown
 # Shop workspace protocol
