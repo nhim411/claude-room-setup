@@ -183,8 +183,12 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(sorted(providers), ["claude-lead", "claude-peer", "claude-supervisor"])
         profiles = json.loads((ROOT / "paseo/profiles.json").read_text())
         for profile in profiles:
-            models = [model["id"] for model in providers[profile["provider"]]["models"]]
+            models = {model["id"]: model for model in providers[profile["provider"]]["models"]}
             self.assertIn(profile["model"], models)
+            thinking = [option["id"] for option in models[profile["model"]].get("thinkingOptions", [])]
+            self.assertIn(profile["thinkingOptionId"], thinking)
+        supervisor = next(profile for profile in profiles if profile["provider"] == "claude-supervisor")
+        self.assertEqual((supervisor["model"], supervisor["thinkingOptionId"]), ("claude-opus-5-5", "low"))
         for name, provider in providers.items():
             self.assertEqual(provider["paseoTools"]["enabled"], name != "claude-peer")
             denied = provider.get("disallowedTools", [])
