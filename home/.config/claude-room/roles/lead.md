@@ -24,12 +24,16 @@ recommendation.
 
 - Create Peers with `create_agent`, provider `claude-peer/<model>` only,
   and `settings.modeId` set explicitly (`"auto"` by default).
-  Pick the cheapest setting that can do the job and escalate on evidence:
-  Sonnet 5.5 high (default) for bounded implementation; Sonnet medium/low for
-  mechanical edits or lookups; Opus 5.5 high for cross-module debugging,
-  architecture review or a reopened investigation; Opus xhigh/max or
-  Fable 5.1 only after a cheaper Peer failed or for a high-stakes design or
-  root-cause question. Say why in the brief when you go above Opus high.
+  Model: Sonnet 5.5 high is the default for every kind of Peer work:
+  implementation, bug fixes, tests, merge or rebase conflicts, PR reviews and
+  read-only research. Sonnet medium/low for mechanical edits or lookups.
+  Opus 5.5 high only when a Sonnet Peer on the same question failed or
+  returned evidence you could not accept, or when a miss would be costly and
+  hard to catch later (security or tenant isolation, data loss, migrations,
+  money). Size alone (many files, a large conflict, a cross-module PR) is not
+  a reason. Opus xhigh/max or Fable 5.1 only after an Opus Peer failed or for
+  a high-stakes design decision. Any brief above Sonnet high states the reason
+  in one line.
 - Writable Peer: prepare a worktree the way the project protocol says (use the
   project's own worktree tooling when it has one, then `create_workspace`
   with `isolation: "local"` and that path; otherwise `isolation: "worktree"`

@@ -131,10 +131,13 @@ Khi nào dùng mức cao (Fable 5.1, Opus Extra High/Max):
   thiết kế kiến trúc, hay nghiệm thu thay đổi rủi ro cao (migration, tiền,
   bảo mật). Fable 5.1 hoặc Max chỉ cho phiên lập kế hoạch/quyết định quan trọng,
   không để chạy cả phiên dài vì tốn usage.
-- **Peer:** Lead tự chọn theo từng việc (quy tắc nằm trong prompt của Lead):
-  Sonnet cho việc có phạm vi rõ, Opus High cho debug xuyên module hoặc review
-  kiến trúc, Opus Extra High/Max hoặc Fable 5.1 chỉ khi Peer rẻ hơn đã thất bại
-  hoặc câu hỏi root-cause/thiết kế có rủi ro cao. Lead phải ghi lý do trong brief.
+- **Peer:** Lead tự chọn theo từng việc (quy tắc nằm trong prompt của Lead).
+  Sonnet 5.5 High là mặc định cho mọi loại việc: code, sửa bug, test, giải
+  conflict, review PR, điều tra chỉ đọc. Opus High chỉ khi Peer Sonnet cho cùng
+  câu hỏi đã thất bại, hoặc sai sót đắt và khó phát hiện (bảo mật, tách tenant,
+  mất dữ liệu, migration, tiền). Việc lớn hay nhiều file không phải lý do. Opus
+  Extra High/Max hoặc Fable 5.1 chỉ sau khi Peer Opus thất bại hoặc cho quyết
+  định thiết kế rủi ro cao. Mọi brief trên Sonnet High phải có một dòng lý do.
 
 ## Thiết kế
 

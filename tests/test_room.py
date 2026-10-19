@@ -228,6 +228,9 @@ class ContractTests(unittest.TestCase):
         room = ROOT / "home/.config/claude-room"
         self.assertIn("settings.modeId", (room / "common.md").read_text())
         self.assertIn("settings.modeId", (room / "roles/lead.md").read_text())
+        lead = " ".join((room / "roles/lead.md").read_text().split())
+        self.assertIn("Sonnet 5.5 high is the default for every kind of Peer work", lead)
+        self.assertIn("Size alone", lead)
         self.assertEqual((ROOT / "CLAUDE.md").read_text().strip(), "@AGENTS.md")
         guide = (ROOT / "AGENTS.md").read_text()
         for command in ("./install --apply", "paseo daemon reload", "./install --verify", "onboard-project.md"):
