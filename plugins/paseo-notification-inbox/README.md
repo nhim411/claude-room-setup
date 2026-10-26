@@ -11,6 +11,13 @@ Plugin Paseo lưu lại notification của agent để xem lại sau khi chúng 
   thời gian.
 - Bấm một dòng để mở tab agent đó và đánh dấu đã đọc. Có nút
   **Mark all read** và **Clear**.
+- Mỗi dòng có nhãn vai trò (**Supervisor / Lead / Peer / Other**, lấy từ
+  provider của agent). Hàng nút lọc phía trên cho phép ẩn bớt vai trò, ví dụ
+  chỉ xem Supervisor và Lead; mặc định hiện tất cả. Lựa chọn lưu trên daemon
+  (`settings.json` cạnh `notifications.json`). Số chưa đọc, **Mark all read**
+  và **Clear** chỉ áp dụng cho các vai trò đang hiển thị; notification của vai
+  trò bị ẩn vẫn được ghi lại. Notification cũ (trước 1.1.0) lấy vai trò từ
+  agent còn tồn tại, nếu không thì tính là Other.
 - Lịch sử giữ 300 notification gần nhất, còn nguyên sau khi reload app hoặc
   restart daemon. Dữ liệu chỉ nằm trên máy, tại
   `~/.paseo/plugin-data/paseo-notification-inbox/notifications.json`.

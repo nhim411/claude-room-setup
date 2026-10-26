@@ -1,12 +1,14 @@
 import type { PluginHandlerContext, PluginServerContext } from "@getpaseo/plugin/server";
 import { AttentionObserver } from "./server/observer.ts";
-import { dataFile } from "./server/paths.ts";
+import { dataFile, settingsFile } from "./server/paths.ts";
+import { SettingsStore } from "./server/settings.ts";
 import { InboxStore } from "./server/store.ts";
 import {
   clearInbox,
   listInbox,
   markAllInboxRead,
   markInboxRead,
+  setInboxFilter,
   unreadInbox,
 } from "./shared/inbox.ts";
 
@@ -16,11 +18,14 @@ const RECONCILE_DELAY_MS = 1_500;
 
 export default function contribute(server: PluginServerContext) {
   const store = new InboxStore(dataFile());
+  const settings = new SettingsStore(settingsFile());
   // Attention before the first load is not replayed; later attention is recorded from here on.
   if (store.watermark === null) store.setWatermark(new Date().toISOString());
   const workspaceNames = new Map<string, string>();
   const observer = new AttentionObserver(store, (id) => (id ? (workspaceNames.get(id) ?? null) : null));
   const lifetime = new AbortController();
+  // Agents already looked up for a role, so archived or deleted ones are not searched again on every poll.
+  const roleLookups = new Set<string>();
   const timers = new Set<ReturnType<typeof setTimeout>>();
   let observing: Paseo | null = null;
 
@@ -40,6 +45,20 @@ export default function contribute(server: PluginServerContext) {
       observer.process(entries.map((entry) => entry.agent));
     } catch (error) {
       console.error("[notification-inbox] reconcile failed:", error);
+    }
+  }
+
+  /** Gives pre-1.1.0 entries a role from the live agent list, when their agent still exists. */
+  async function resolveMissingRoles(paseo: Paseo): Promise<void> {
+    const wanted = store.unresolvedAgentIds().filter((id) => !roleLookups.has(id));
+    if (wanted.length === 0) return;
+    try {
+      const { entries } = await paseo.agents.list();
+      const providers = new Map(entries.map(({ agent }) => [agent.id, agent.provider]));
+      for (const id of wanted) roleLookups.add(id);
+      store.resolveRoles(providers);
+    } catch (error) {
+      console.error("[notification-inbox] role lookup failed:", error);
     }
   }
 
@@ -89,25 +108,34 @@ export default function contribute(server: PluginServerContext) {
     server.on("agent.created", (_event, { paseo }) => void ensureObserving(paseo)),
   ];
 
-  server.handle(listInbox, (_input, { paseo }) => {
+  server.handle(listInbox, async (_input, { paseo }) => {
     void ensureObserving(paseo);
-    return { entries: store.list(), unreadCount: store.unreadCount() };
+    await resolveMissingRoles(paseo);
+    const filter = settings.filter;
+    return {
+      entries: store.list(filter),
+      unreadCount: store.unreadCount(filter),
+      total: store.list().length,
+      filter,
+    };
   });
-  server.handle(unreadInbox, (_input, { paseo }) => {
+  server.handle(unreadInbox, async (_input, { paseo }) => {
     void ensureObserving(paseo);
-    return { unreadCount: store.unreadCount() };
+    await resolveMissingRoles(paseo);
+    return { unreadCount: store.unreadCount(settings.filter) };
   });
+  server.handle(setInboxFilter, (input) => settings.setFilter(input));
   server.handle(markInboxRead, ({ id }) => {
     store.markRead(id);
-    return { unreadCount: store.unreadCount() };
+    return { unreadCount: store.unreadCount(settings.filter) };
   });
   server.handle(markAllInboxRead, () => {
-    store.markAllRead();
-    return { unreadCount: 0 };
+    store.markAllRead(settings.filter);
+    return { unreadCount: store.unreadCount(settings.filter) };
   });
   server.handle(clearInbox, () => {
-    store.clear();
-    return { unreadCount: 0 };
+    store.clear(settings.filter);
+    return { unreadCount: store.unreadCount(settings.filter) };
   });
 
   console.log(`[notification-inbox] ready, storing to ${dataFile()}`);

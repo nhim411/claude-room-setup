@@ -1,6 +1,6 @@
 {
   "name": "paseo-notification-inbox",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Paseo plugin: persistent inbox of agent attention notifications",
   "private": true,
   "license": "UNLICENSED",

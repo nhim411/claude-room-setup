@@ -9,12 +9,19 @@ import {
   clearInbox,
   listInbox,
   markAllInboxRead,
+  INBOX_ROLES,
+  entryRole,
   markInboxRead,
+  setInboxFilter,
   unreadInbox,
   type InboxEntry,
+  type InboxFilter,
   type InboxReason,
+  type InboxRole,
 } from "../shared/inbox.ts";
 import { relativeTime } from "./time.ts";
+
+type ListData = { entries: InboxEntry[]; unreadCount: number; total: number; filter: InboxFilter };
 
 const REFRESH_MS = 5_000;
 const LIST_KEY = ["notification-inbox", "list"] as const;
@@ -29,6 +36,13 @@ const REASON_ICON: Record<InboxReason, string> = {
   finished: "CircleCheck",
   error: "CircleAlert",
   permission: "ShieldQuestion",
+};
+
+const ROLE_LABEL: Record<InboxRole, string> = {
+  supervisor: "Supervisor",
+  lead: "Lead",
+  peer: "Peer",
+  other: "Other",
 };
 
 function reasonColor(theme: PluginTheme, reason: InboxReason): string {
@@ -80,6 +94,7 @@ export function InboxScreen({ theme, layout, host, navigation }: PluginScreenPro
   const markRead = useRpc(markInboxRead);
   const markAll = useRpc(markAllInboxRead);
   const clear = useRpc(clearInbox);
+  const saveFilter = useRpc(setInboxFilter);
 
   const query = useQuery({
     queryKey: LIST_KEY,
@@ -94,6 +109,13 @@ export function InboxScreen({ theme, layout, host, navigation }: PluginScreenPro
   const readMutation = useMutation({ mutationFn: (id: string) => markRead({ id }), onSuccess: invalidate });
   const readAllMutation = useMutation({ mutationFn: () => markAll({}), onSuccess: invalidate });
   const clearMutation = useMutation({ mutationFn: () => clear({}), onSuccess: invalidate });
+  const filterMutation = useMutation({
+    mutationFn: (filter: InboxFilter) => saveFilter(filter),
+    onMutate: (filter) => {
+      queryClient.setQueryData<ListData>(LIST_KEY, (old) => (old ? { ...old, filter } : old));
+    },
+    onSettled: invalidate,
+  });
 
   const styles = useMemo(
     () => ({
@@ -127,6 +149,34 @@ export function InboxScreen({ theme, layout, host, navigation }: PluginScreenPro
       rowBody: { flex: 1, gap: 2 },
       title: { color: theme.colors.foreground, fontSize: 15 },
       meta: { color: theme.colors.foregroundMuted, fontSize: 13 },
+      chips: {
+        flexDirection: "row" as const,
+        flexWrap: "wrap" as const,
+        gap: 8,
+        paddingVertical: 8,
+        paddingHorizontal: layout.compact ? 12 : 16,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.border,
+      },
+      chip: {
+        paddingVertical: 4,
+        paddingHorizontal: 10,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+      },
+      chipOn: { backgroundColor: theme.colors.accent, borderColor: theme.colors.accent },
+      chipText: { color: theme.colors.foregroundMuted, fontSize: 13 },
+      chipTextOn: { color: theme.colors.accentForeground },
+      titleLine: { flexDirection: "row" as const, alignItems: "center" as const, gap: 8 },
+      roleTag: {
+        color: theme.colors.foregroundMuted,
+        fontSize: 11,
+        paddingHorizontal: 6,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        borderRadius: 6,
+      },
       empty: { color: theme.colors.foregroundMuted, padding: 24, textAlign: "center" as const },
     }),
     [theme, layout.compact],
@@ -134,6 +184,17 @@ export function InboxScreen({ theme, layout, host, navigation }: PluginScreenPro
 
   const entries = query.data?.entries ?? [];
   const unreadCount = query.data?.unreadCount ?? 0;
+  const total = query.data?.total ?? 0;
+  const activeRoles = query.data?.filter.roles ?? INBOX_ROLES;
+  const filtered = activeRoles.length < INBOX_ROLES.length;
+  const shown = filtered ? "shown" : "all";
+
+  function toggleRole(role: InboxRole) {
+    const roles = activeRoles.includes(role)
+      ? activeRoles.filter((r) => r !== role)
+      : INBOX_ROLES.filter((r) => r === role || activeRoles.includes(r));
+    filterMutation.mutate({ roles });
+  }
 
   function open(entry: InboxEntry) {
     if (!entry.read) readMutation.mutate(entry.id);
@@ -149,23 +210,40 @@ export function InboxScreen({ theme, layout, host, navigation }: PluginScreenPro
         <View style={styles.actions}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Mark all notifications read"
+            accessibilityLabel={`Mark ${shown} notifications read`}
             disabled={unreadCount === 0}
             onPress={() => readAllMutation.mutate()}
             style={[styles.button, unreadCount === 0 && { opacity: 0.5 }]}
           >
-            <Text style={styles.buttonText}>Mark all read</Text>
+            <Text style={styles.buttonText}>{filtered ? "Mark shown read" : "Mark all read"}</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Clear all notifications"
+            accessibilityLabel={`Clear ${shown} notifications`}
             disabled={entries.length === 0}
             onPress={() => clearMutation.mutate()}
             style={[styles.button, entries.length === 0 && { opacity: 0.5 }]}
           >
-            <Text style={styles.buttonText}>Clear</Text>
+            <Text style={styles.buttonText}>{filtered ? `Clear shown (${entries.length})` : "Clear"}</Text>
           </Pressable>
         </View>
+      </View>
+      <View style={styles.chips}>
+        {INBOX_ROLES.map((role) => {
+          const on = activeRoles.includes(role);
+          return (
+            <Pressable
+              key={role}
+              accessibilityRole="button"
+              accessibilityState={{ selected: on }}
+              accessibilityLabel={`${ROLE_LABEL[role]} notifications ${on ? "shown" : "hidden"}`}
+              onPress={() => toggleRole(role)}
+              style={[styles.chip, on && styles.chipOn]}
+            >
+              <Text style={[styles.chipText, on && styles.chipTextOn]}>{ROLE_LABEL[role]}</Text>
+            </Pressable>
+          );
+        })}
       </View>
       {query.isError ? (
         <Text style={styles.empty}>Could not load notifications. Retrying.</Text>
@@ -174,12 +252,16 @@ export function InboxScreen({ theme, layout, host, navigation }: PluginScreenPro
           data={entries}
           keyExtractor={(entry) => entry.id}
           ListEmptyComponent={
-            query.isPending ? undefined : <Text style={styles.empty}>No notifications yet.</Text>
+            query.isPending ? undefined : (
+              <Text style={styles.empty}>
+                {total > 0 ? "No notifications match the selected roles." : "No notifications yet."}
+              </Text>
+            )
           }
           renderItem={({ item }) => (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`${REASON_LABEL[item.reason]}: ${item.agentTitle ?? "Untitled agent"}${item.read ? "" : ", unread"}`}
+              accessibilityLabel={`${ROLE_LABEL[entryRole(item)]} ${REASON_LABEL[item.reason]}: ${item.agentTitle ?? "Untitled agent"}${item.read ? "" : ", unread"}`}
               onPress={() => open(item)}
               style={styles.row}
             >
@@ -189,12 +271,15 @@ export function InboxScreen({ theme, layout, host, navigation }: PluginScreenPro
                 color={reasonColor(theme, item.reason)}
               />
               <View style={styles.rowBody}>
-                <Text
-                  numberOfLines={1}
-                  style={[styles.title, !item.read && { fontWeight: "700" }]}
-                >
-                  {item.agentTitle ?? "Untitled agent"}
-                </Text>
+                <View style={styles.titleLine}>
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.title, !item.read && { fontWeight: "700" }, { flexShrink: 1 }]}
+                  >
+                    {item.agentTitle ?? "Untitled agent"}
+                  </Text>
+                  <Text style={styles.roleTag}>{ROLE_LABEL[entryRole(item)]}</Text>
+                </View>
                 <Text numberOfLines={1} style={styles.meta}>
                   {[REASON_LABEL[item.reason], item.workspaceName, relativeTime(item.at)]
                     .filter(Boolean)

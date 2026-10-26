@@ -1,8 +1,9 @@
-import type { InboxEntry, InboxReason } from "../shared/inbox.ts";
+import { roleFromProvider, type InboxEntry, type InboxReason } from "../shared/inbox.ts";
 
 /** The subset of an agent snapshot the transition logic needs. */
 export interface AttentionAgent {
   id: string;
+  provider?: string | null;
   title?: string | null;
   workspaceId?: string | null;
   requiresAttention?: boolean;
@@ -43,6 +44,8 @@ export function detectTransitions(
       workspaceId,
       workspaceName: context.workspaceName(workspaceId),
       at: agent.attentionTimestamp,
+      role: roleFromProvider(agent.provider),
+      provider: agent.provider ?? null,
     });
   }
   return result;

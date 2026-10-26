@@ -1,6 +1,13 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { INBOX_MAX_ENTRIES, InboxEntrySchema, type InboxEntry } from "../shared/inbox.ts";
+import {
+  INBOX_MAX_ENTRIES,
+  InboxEntrySchema,
+  entryRole,
+  roleFromProvider,
+  type InboxEntry,
+  type InboxFilter,
+} from "../shared/inbox.ts";
 import { z } from "zod";
 
 const FileSchema = z.object({
@@ -86,14 +93,36 @@ export class InboxStore {
     return added;
   }
 
-  list(): InboxEntry[] {
+  /** Entries whose role passes the filter; everything when no filter is given. */
+  list(filter?: InboxFilter): InboxEntry[] {
     this.load();
-    return this.entries;
+    if (!filter) return this.entries;
+    return this.entries.filter((entry) => filter.roles.includes(entryRole(entry)));
   }
 
-  unreadCount(): number {
+  unreadCount(filter?: InboxFilter): number {
+    return this.list(filter).filter((entry) => !entry.read).length;
+  }
+
+  /** Agent ids of entries recorded before roles existed. */
+  unresolvedAgentIds(): string[] {
     this.load();
-    return this.entries.filter((entry) => !entry.read).length;
+    return [...new Set(this.entries.filter((entry) => entry.role === undefined).map((e) => e.agentId))];
+  }
+
+  /** Fills role and provider on role-less entries whose agent is in `providers`. Returns how many changed. */
+  resolveRoles(providers: ReadonlyMap<string, string>): number {
+    this.load();
+    let changed = 0;
+    for (const entry of this.entries) {
+      const provider = entry.role === undefined ? providers.get(entry.agentId) : undefined;
+      if (provider === undefined) continue;
+      entry.role = roleFromProvider(provider);
+      entry.provider = provider;
+      changed += 1;
+    }
+    if (changed > 0) this.save();
+    return changed;
   }
 
   markRead(id: string): void {
@@ -104,16 +133,19 @@ export class InboxStore {
     this.save();
   }
 
-  markAllRead(): void {
-    this.load();
-    if (this.unreadCount() === 0) return;
-    for (const entry of this.entries) entry.read = true;
+  /** Marks read the entries passing the filter (all when none is given). */
+  markAllRead(filter?: InboxFilter): void {
+    const unread = this.list(filter).filter((entry) => !entry.read);
+    if (unread.length === 0) return;
+    for (const entry of unread) entry.read = true;
     this.save();
   }
 
-  clear(): void {
+  /** Removes the entries passing the filter (all when none is given). */
+  clear(filter?: InboxFilter): void {
     this.load();
-    this.entries = [];
+    if (!filter) this.entries = [];
+    else this.entries = this.entries.filter((entry) => !filter.roles.includes(entryRole(entry)));
     this.save();
   }
 }
