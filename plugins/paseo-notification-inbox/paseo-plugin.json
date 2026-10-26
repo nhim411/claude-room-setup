@@ -1,0 +1,6 @@
+{
+  "id": "paseo-notification-inbox",
+  "name": "Notification inbox",
+  "description": "Keeps a persistent, reviewable history of agent finished, error and permission notifications",
+  "requirements": { "paseo": ">=0.13.0" }
+}

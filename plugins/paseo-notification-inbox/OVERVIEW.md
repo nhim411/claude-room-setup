@@ -1,0 +1,5 @@
+Keeps a history of Paseo's agent notifications so they can be reviewed after they disappear. Whenever an agent finishes, fails, or asks for permission, the plugin records an entry. A bell item in the sidebar header shows the unread count and opens a list of past notifications, newest first, with the agent title, the reason, the workspace name and how long ago it happened. Pressing a row opens that agent and marks the entry read. Mark all read and Clear are at the top of the list.
+
+Recording happens on the daemon, so notifications are kept even when no app window is open. The history survives app reloads, plugin reloads and daemon restarts. It holds the latest 300 entries.
+
+The plugin listens to agent lifecycle hooks and to the daemon's agent list, and it stores entries in `~/.paseo/plugin-data/paseo-notification-inbox/notifications.json` (set `PASEO_NOTIFICATION_INBOX_DIR` to move it). Attention that existed before the plugin was first loaded is not recorded. It sends nothing off the machine and needs Paseo 0.13.0 or later (daemon and app).
