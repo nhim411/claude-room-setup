@@ -194,6 +194,21 @@ Medium đều đạt 9/9, usage và thời gian gần như bằng nhau. Mặc đ
 là High để có biên an toàn khi chia việc và nghiệm thu; chọn Medium hoặc Low
 cho việc nhỏ và rõ ràng để tiết kiệm usage.
 
+## Plugin tuỳ chọn: hộp thư notification
+
+Notification của Paseo (agent xong việc, lỗi, cần quyền) hiện lên rồi biến
+mất. Plugin [`plugins/paseo-notification-inbox`](plugins/paseo-notification-inbox/OVERVIEW.md)
+ghi lại từng notification trên daemon, thêm icon chuông có số chưa đọc ở đầu
+sidebar. Bấm chuông để xem lại danh sách, bấm một dòng để mở tab agent đó.
+Installer không cài plugin này; cài riêng trên máy chạy daemon (cần bật
+plugin trong Settings → Plugins, Paseo 0.13.0 trở lên cho cả daemon và app):
+
+```bash
+cd plugins/paseo-notification-inbox
+npm install && npm run typecheck && npm test
+paseo plugin install "$PWD"
+```
+
 ## Gỡ lỗi
 
 | Hiện tượng | Kiểm tra |
