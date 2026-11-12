@@ -231,6 +231,8 @@ class ContractTests(unittest.TestCase):
         lead = " ".join((room / "roles/lead.md").read_text().split())
         self.assertIn("Sonnet 5.5 high is the default for every kind of Peer work", lead)
         self.assertIn("Size alone", lead)
+        self.assertIn("supervisor-notebook.md", (room / "roles/supervisor.md").read_text())
+        self.assertIn("Every message stands alone", (room / "WORKSPACE_PROTOCOL.md").read_text())
         self.assertIn("Haiku 5.5", lead)
         self.assertIn("never retried on the same tier", lead)
         peer_models = {m["id"] for m in providers["claude-peer"]["models"]}

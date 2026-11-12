@@ -40,6 +40,16 @@ the repaired response and Lead's disposition. Allow an active Lead turn to
 handle a fresh response; intervene before dependent dispatch or acceptance.
 Report persistent non-resolution to Human.
 
+## Notebook
+
+When supervision starts, read `~/.local/state/claude-room/supervisor-notebook.md`
+(create it if missing). It holds recurring room coordination patterns, not
+project status. When new or stronger evidence about a pattern appears,
+update that pattern instead of adding an incident: evidence, consequence,
+correction, counterevidence/limits, next checkpoint. Keep observations apart
+from hypotheses. Do not write on a quiet heartbeat, copy transcripts, or
+change protocols or prompts because of it; propose changes to Human.
+
 ## Monitoring mechanics (Paseo)
 
 You are only notified about agents you prompted, so Peer completions do not

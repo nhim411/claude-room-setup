@@ -119,10 +119,10 @@ agent profile của Paseo):
 | Seat | Mặc định | Lựa chọn khác |
 | --- | --- | --- |
 | Supervisor | Sonnet 5.5 Low | Sonnet 5.5 Medium, Opus 5.5 Low/Medium |
-| Lead | Opus 5.5 High | Opus 5.5 Medium/Low/Extra High/Max, Fable 5.1 High/Extra High, Sonnet 5.5 High/Medium |
-| Peer | Sonnet 5.5 High | Haiku 5.5 Off/Low/Medium, Sonnet 5.5 Low/Medium/Extra High, Opus 5.5 Medium/High/Extra High/Max, Fable 5.1 High/Extra High |
+| Lead | Opus 5.5 High | Opus 5.5 Medium/Low/Extra High/Max, Fable 5.2 High/Extra High, Sonnet 5.5 High/Medium |
+| Peer | Sonnet 5.5 High | Haiku 5.5 Off/Low/Medium, Sonnet 5.5 Low/Medium/Extra High, Opus 5.5 Medium/High/Extra High/Max, Fable 5.2 High/Extra High |
 
-Khi nào dùng mức cao (Fable 5.1, Opus Extra High/Max):
+Khi nào dùng mức cao (Fable 5.2, Opus Extra High/Max):
 
 - **Supervisor:** không cần. Việc của nó là đọc trạng thái và đối chiếu, không
   code, không chia việc, nên Sonnet Low là đủ; lên Medium khi giám sát nhiều
@@ -130,7 +130,7 @@ Khi nào dùng mức cao (Fable 5.1, Opus Extra High/Max):
 - **Lead:** High làm mặc định để chia việc và nghiệm thu chắc tay. Hạ xuống
   Medium/Low cho việc nhỏ và rõ ràng; lên Extra High khi chia một epic lớn,
   thiết kế kiến trúc, hay nghiệm thu thay đổi rủi ro cao (migration, tiền,
-  bảo mật). Fable 5.1 hoặc Max chỉ cho phiên lập kế hoạch/quyết định quan trọng,
+  bảo mật). Fable 5.2 hoặc Max chỉ cho phiên lập kế hoạch/quyết định quan trọng,
   không để chạy cả phiên dài vì tốn usage.
 - **Peer:** Lead tự chọn theo từng việc (quy tắc nằm trong prompt của Lead).
   Chọn tier rẻ nhất đủ cho việc, theo mức phán đoán chứ không theo kích thước:
@@ -142,7 +142,7 @@ Khi nào dùng mức cao (Fable 5.1, Opus Extra High/Max):
   không chắc từ tier thấp thì giao lại tier cao hơn, không thử lại cùng tier. Opus High chỉ khi Peer Sonnet cho cùng
   câu hỏi đã thất bại, hoặc sai sót đắt và khó phát hiện (bảo mật, tách tenant,
   mất dữ liệu, migration, tiền). Việc lớn hay nhiều file không phải lý do. Opus
-  Extra High/Max hoặc Fable 5.1 chỉ sau khi Peer Opus thất bại hoặc cho quyết
+  Extra High/Max hoặc Fable 5.2 chỉ sau khi Peer Opus thất bại hoặc cho quyết
   định thiết kế rủi ro cao. Mọi brief trên Sonnet High phải có một dòng lý do.
 
 ## Thiết kế

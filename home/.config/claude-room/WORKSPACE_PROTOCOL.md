@@ -26,6 +26,13 @@ Technical acceptance never implies permission for external effects.
   constraints, write scope, inputs and their status, acceptance evidence,
   granted external authority, and what should reopen the decision. File lists
   are provisional.
+- Every message stands alone, not only the first brief: follow-ups,
+  corrections and ACCEPT/REJECT name the exact candidate, the reason and the
+  permitted next action. Write direct instructions: no narration of who asked
+  whom, no role labels to attribute a request, no inference passed off as an
+  authorized decision. Keep observations, questions, recommendations and
+  decisions distinct. Results come back the same way: outcome, candidate,
+  scope, evidence, limits, decision needed.
 - Do not start blocked work to look busy; keep each ready branch moving.
 
 ## Handoff
