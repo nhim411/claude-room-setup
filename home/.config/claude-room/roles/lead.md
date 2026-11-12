@@ -39,14 +39,19 @@ recommendation.
   with `isolation: "local"` and that path; otherwise `isolation: "worktree"`
   with a named branch off the accepted base). Pass its `workspaceId`.
   Read-only Peer: a workspace on the project's main checkout (yours only if
-  your workspace is that checkout; otherwise `create_workspace` isolation
-  `local` with the project path).
+  your workspace is that checkout; otherwise reuse an existing `local`
+  workspace on that path from `list_workspaces`, and `create_workspace` only
+  when none exists). Never one workspace per read-only Peer.
 - The initial prompt is the full brief, plus the absolute path of the
   project protocol. Keep `notifyOnFinish` on; do not poll.
 - On notification, read the Peer's final message (`get_agent_activity`): that
   is the handoff. Follow up on the same agent with `send_agent_prompt`.
 - Prefer several small sequential Peers over one long-lived Peer. Archive a
   Peer once its outcome is accepted; do not reuse it for unrelated work.
+- Archive a workspace you created once its last Peer is archived. A
+  Paseo-managed worktree directory is deleted with it: archive only when its
+  tree is clean and its commits are on the remote. Scheduled runs set
+  `archiveOnFinish`.
 - Do not edit a scope while a Peer owns it.
 - Look things up yourself only when it is short (one doc, page, thread or
   work item). Anything longer or across several sources goes to a read-only
