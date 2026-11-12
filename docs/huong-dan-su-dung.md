@@ -179,8 +179,9 @@ hoặc `REJECT ...`, bằng chứng, giới hạn, và quyết định cần b�
 
 ## Lưu ý
 
-- Chi phí tăng theo số agent: Lead dùng Opus High, Peer dùng Sonnet. Đổi model
-  trong `paseo/providers.json` nếu cần.
+- Chi phí tăng theo số agent: Lead dùng Opus High, Supervisor dùng Sonnet Low,
+  Peer mặc định Sonnet High nhưng Lead hạ xuống Haiku cho tra cứu thuần và
+  Sonnet Low/Medium cho việc cơ học. Đổi model trong `paseo/providers.json` nếu cần.
 - Peer không có tool Paseo nên không tự tạo agent. Nếu thấy Peer làm việc đó,
   chạy `./install --verify`.
 - Đổi role hoặc protocol thì tạo lại agent; agent đang chạy giữ prompt cũ.

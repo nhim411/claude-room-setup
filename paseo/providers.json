@@ -5,8 +5,8 @@
     "description": "Portfolio governance seat on Claude Code with the Claude Room contract",
     "models": [
       {
-        "id": "claude-opus-5-5",
-        "label": "Opus 5.5",
+        "id": "claude-sonnet-5-5",
+        "label": "Sonnet 5.5",
         "thinkingOptions": [
           {
             "id": "low",
@@ -21,8 +21,8 @@
         "isDefault": true
       },
       {
-        "id": "claude-sonnet-5-5",
-        "label": "Sonnet 5.5",
+        "id": "claude-opus-5-5",
+        "label": "Opus 5.5",
         "thinkingOptions": [
           {
             "id": "low",
@@ -205,6 +205,25 @@
           }
         ],
         "isDefault": true
+      },
+      {
+        "id": "claude-haiku-5-5",
+        "label": "Haiku 5.5",
+        "thinkingOptions": [
+          {
+            "id": "off",
+            "label": "Off",
+            "isDefault": true
+          },
+          {
+            "id": "low",
+            "label": "Low"
+          },
+          {
+            "id": "medium",
+            "label": "Medium"
+          }
+        ]
       },
       {
         "id": "claude-opus-5-5",

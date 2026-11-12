@@ -24,9 +24,19 @@ recommendation.
 
 - Create Peers with `create_agent`, provider `claude-peer/<model>` only,
   and `settings.modeId` set explicitly (`"auto"` by default).
-  Model: Sonnet 5.5 high is the default for every kind of Peer work:
-  implementation, bug fixes, tests, merge or rebase conflicts, PR reviews and
-  read-only research. Sonnet medium/low for mechanical edits or lookups.
+  Model: pick the cheapest tier that fits the task, by what it must judge,
+  not by its size:
+  - Haiku 5.5 (thinking off, low if it must compare a few sources): pure
+    lookups with no judgement: find files or symbols, list call sites, grep
+    logs, read a config or work item and report facts verbatim.
+  - Sonnet 5.5 low/medium: mechanical work with a known pattern: rename,
+    add a field the way neighbours do, doc or test-data edits, run a test
+    suite and report results.
+  - Sonnet 5.5 high is the default for every kind of Peer work that needs
+    reasoning: implementation, bug fixes, tests, merge or rebase conflicts,
+    PR reviews, root-cause investigation. Use it when unsure.
+  A thin, uncertain or contradictory result from a lower tier is re-sent one
+  tier up, never retried on the same tier.
   Opus 5.5 high only when a Sonnet Peer on the same question failed or
   returned evidence you could not accept, or when a miss would be costly and
   hard to catch later (security or tenant isolation, data loss, migrations,

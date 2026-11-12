@@ -212,7 +212,7 @@ class ContractTests(unittest.TestCase):
             thinking = [option["id"] for option in models[profile["model"]].get("thinkingOptions", [])]
             self.assertIn(profile["thinkingOptionId"], thinking)
         supervisor = next(profile for profile in profiles if profile["provider"] == "claude-supervisor")
-        self.assertEqual((supervisor["model"], supervisor["thinkingOptionId"]), ("claude-opus-5-5", "low"))
+        self.assertEqual((supervisor["model"], supervisor["thinkingOptionId"]), ("claude-sonnet-5-5", "low"))
         for profile in profiles:
             model = next(m for m in providers[profile["provider"]]["models"] if m.get("isDefault"))
             default = next(o["id"] for o in model["thinkingOptions"] if o.get("isDefault"))
@@ -231,6 +231,10 @@ class ContractTests(unittest.TestCase):
         lead = " ".join((room / "roles/lead.md").read_text().split())
         self.assertIn("Sonnet 5.5 high is the default for every kind of Peer work", lead)
         self.assertIn("Size alone", lead)
+        self.assertIn("Haiku 5.5", lead)
+        self.assertIn("never retried on the same tier", lead)
+        peer_models = {m["id"] for m in providers["claude-peer"]["models"]}
+        self.assertIn("claude-haiku-5-5", peer_models)
         self.assertEqual((ROOT / "CLAUDE.md").read_text().strip(), "@AGENTS.md")
         guide = (ROOT / "AGENTS.md").read_text()
         for command in ("./install --apply", "paseo daemon reload", "./install --verify", "onboard-project.md"):
