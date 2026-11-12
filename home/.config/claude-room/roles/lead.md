@@ -42,8 +42,11 @@ recommendation.
   your workspace is that checkout; otherwise the room workspace
   `<project>-room`, e.g. `ankus-room`: find it in `list_workspaces`, create it
   once with isolation `local` on the project path if missing). Sub-Leads go
-  there too. Never one workspace per read-only Peer. Writable Peers still get
-  their own worktree workspace.
+  there too. Never one workspace per read-only Peer. A Peer or Lead that
+  needs its own worktree gets its own workspace, titled
+  `<project>-room-<seat><n>[-<work item>]` (e.g. `ankus-room-peer1-5798`).
+  Before closing your turn, archive every `<project>-room-*` workspace whose
+  task is accepted (clean tree, commits on the remote).
 - The initial prompt is the full brief, plus the absolute path of the
   project protocol. Keep `notifyOnFinish` on; do not poll.
 - On notification, read the Peer's final message (`get_agent_activity`): that
