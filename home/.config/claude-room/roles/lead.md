@@ -39,9 +39,11 @@ recommendation.
   with `isolation: "local"` and that path; otherwise `isolation: "worktree"`
   with a named branch off the accepted base). Pass its `workspaceId`.
   Read-only Peer: a workspace on the project's main checkout (yours only if
-  your workspace is that checkout; otherwise reuse an existing `local`
-  workspace on that path from `list_workspaces`, and `create_workspace` only
-  when none exists). Never one workspace per read-only Peer.
+  your workspace is that checkout; otherwise the room workspace
+  `<project>-room`, e.g. `ankus-room`: find it in `list_workspaces`, create it
+  once with isolation `local` on the project path if missing). Sub-Leads go
+  there too. Never one workspace per read-only Peer. Writable Peers still get
+  their own worktree workspace.
 - The initial prompt is the full brief, plus the absolute path of the
   project protocol. Keep `notifyOnFinish` on; do not poll.
 - On notification, read the Peer's final message (`get_agent_activity`): that
