@@ -113,37 +113,24 @@ Hướng dẫn chi tiết và ví dụ áp dụng cho một dự án thật: [do
 | Hợp đồng chung của workspace | `home/.config/claude-room/WORKSPACE_PROTOCOL.md` | `./install --apply` |
 | Quy trình onboarding dự án | `home/.config/claude-room/onboard-project.md` | `./install --apply` |
 
-Model mặc định và các lựa chọn khác (chọn khi tạo agent hoặc trong
-agent profile của Paseo):
+Model trong SLP (chọn khi tạo agent hoặc qua profile Room *; Peer do Lead tự chọn):
 
-| Seat | Mặc định | Lựa chọn khác |
+| Seat | Mặc định | Khi nào đổi |
 | --- | --- | --- |
-| Supervisor | Sonnet 5.5 Low | Sonnet 5.5 Medium, Opus 5.5 Low/Medium |
-| Lead | Opus 5.5 High | Opus 5.5 Medium/Low/Extra High/Max, Fable 5.2 High/Extra High, Sonnet 5.5 High/Medium |
-| Peer | Sonnet 5.5 High | Haiku 5.5 Off/Low/Medium, Sonnet 5.5 Low/Medium/Extra High, Opus 5.5 Medium/High/Extra High/Max, Fable 5.2 High/Extra High |
+| Supervisor | Sonnet 5.5 Low | Medium khi giám sát nhiều workspace; Opus Low/Medium khi luồng việc rối và Sonnet bỏ sót drift |
+| Lead | Opus 5.5 Medium | Low cho việc nhỏ, rõ, ít Peer; High/Extra High khi chia epic lớn, thiết kế kiến trúc, nghiệm thu thay đổi rủi ro (migration, bảo mật, tiền); Fable 5.2 hoặc Max chỉ cho phiên quyết định quan trọng, không chạy cả phiên dài |
+| Peer: tra cứu thuần | Haiku 5.5 Off (Low nếu đối chiếu vài nguồn) | Tìm file/symbol, liệt kê call site, grep log, đọc config/work item rồi báo nguyên văn |
+| Peer: việc cơ học | Sonnet 5.5 Low/Medium | Rename, thêm field theo mẫu, sửa doc, chạy test rồi báo kết quả |
+| Peer: việc cần suy luận (mặc định) | Sonnet 5.5 High | Code, sửa bug, viết test, giải conflict, review PR, tìm nguyên nhân |
+| Peer: rủi ro cao | Opus 5.5 High | Peer Sonnet đã thất bại, hoặc sai sót đắt và khó phát hiện (bảo mật, tách tenant, mất dữ liệu, migration, tiền). Việc lớn hay nhiều file không phải lý do |
+| Peer: khó nhất | Opus Extra High/Max, Fable 5.2 | Chỉ sau khi Peer Opus thất bại, hoặc quyết định thiết kế rủi ro cao |
 
-Khi nào dùng mức cao (Fable 5.2, Opus Extra High/Max):
+Quy tắc chung:
 
-- **Supervisor:** không cần. Việc của nó là đọc trạng thái và đối chiếu, không
-  code, không chia việc, nên Sonnet Low là đủ; lên Medium khi giám sát nhiều
-  workspace, hoặc Opus khi luồng việc rối và Sonnet bỏ sót drift.
-- **Lead:** High làm mặc định để chia việc và nghiệm thu chắc tay. Hạ xuống
-  Medium/Low cho việc nhỏ và rõ ràng; lên Extra High khi chia một epic lớn,
-  thiết kế kiến trúc, hay nghiệm thu thay đổi rủi ro cao (migration, tiền,
-  bảo mật). Fable 5.2 hoặc Max chỉ cho phiên lập kế hoạch/quyết định quan trọng,
-  không để chạy cả phiên dài vì tốn usage.
-- **Peer:** Lead tự chọn theo từng việc (quy tắc nằm trong prompt của Lead).
-  Chọn tier rẻ nhất đủ cho việc, theo mức phán đoán chứ không theo kích thước:
-  Haiku 5.5 (thinking Off/Low) cho tra cứu thuần (tìm file/symbol, liệt kê
-  call site, grep log, đọc config/work item rồi báo nguyên văn); Sonnet Low/Medium
-  cho việc cơ học theo mẫu có sẵn (rename, thêm field theo mẫu, sửa doc, chạy
-  test rồi báo kết quả); Sonnet 5.5 High là mặc định cho việc cần suy luận: code,
-  sửa bug, test, giải conflict, review PR, tìm nguyên nhân. Kết quả mỏng hoặc
-  không chắc từ tier thấp thì giao lại tier cao hơn, không thử lại cùng tier. Opus High chỉ khi Peer Sonnet cho cùng
-  câu hỏi đã thất bại, hoặc sai sót đắt và khó phát hiện (bảo mật, tách tenant,
-  mất dữ liệu, migration, tiền). Việc lớn hay nhiều file không phải lý do. Opus
-  Extra High/Max hoặc Fable 5.2 chỉ sau khi Peer Opus thất bại hoặc cho quyết
-  định thiết kế rủi ro cao. Mọi brief trên Sonnet High phải có một dòng lý do.
+- Chọn tier rẻ nhất đủ cho việc, theo mức phán đoán cần có, không theo kích thước.
+- Kết quả mỏng hoặc không chắc từ tier thấp thì giao lại tier cao hơn, không thử lại cùng tier.
+- Mọi brief giao Peer trên Sonnet High phải có một dòng lý do.
+- Model và effort mặc định nằm ở `paseo/providers.json` và `paseo/profiles.json`.
 
 ## Thiết kế
 
@@ -196,9 +183,9 @@ Supervisor không sửa code nên cắt được nhiều nhất. Peer giữ đ�
 chrome-devtools, Playwright hay skill cá nhân khi làm việc.
 
 Thử nghiệm A/B (cùng task, chấm bằng 9 test ẩn): Lead Opus Low và Lead Opus
-Medium đều đạt 9/9, usage và thời gian gần như bằng nhau. Mặc định của Lead
-là High để có biên an toàn khi chia việc và nghiệm thu; chọn Medium hoặc Low
-cho việc nhỏ và rõ ràng để tiết kiệm usage.
+Medium đều đạt 9/9, usage và thời gian gần như bằng nhau. Vì vậy mặc định
+của Lead là Medium: rẻ hơn High mà vẫn giữ biên an toàn khi chia việc và nghiệm
+thu, vì lỗi ở Lead nhân lên qua mọi Peer. Task A/B nhỏ nên chưa đủ để mặc định Low.
 
 ## Plugin tuỳ chọn: hộp thư notification
 
