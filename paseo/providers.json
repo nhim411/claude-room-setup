@@ -230,9 +230,13 @@
         "label": "Opus 5.5",
         "thinkingOptions": [
           {
-            "id": "high",
-            "label": "High",
+            "id": "low",
+            "label": "Low",
             "isDefault": true
+          },
+          {
+            "id": "high",
+            "label": "High"
           },
           {
             "id": "medium",

@@ -37,7 +37,8 @@ recommendation.
     PR reviews, root-cause investigation. Use it when unsure.
   A thin, uncertain or contradictory result from a lower tier is re-sent one
   tier up, never retried on the same tier.
-  Opus 5.5 high only when a Sonnet Peer on the same question failed or
+  Opus 5.5 (default effort low; raise to high only when an Opus low Peer on
+  the same question failed) only when a Sonnet Peer on the same question failed or
   returned evidence you could not accept, or when a miss would be costly and
   hard to catch later (security or tenant isolation, data loss, migrations,
   money). Size alone (many files, a large conflict, a cross-module PR) is not

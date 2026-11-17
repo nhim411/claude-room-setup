@@ -122,7 +122,7 @@ Model trong SLP (chọn khi tạo agent hoặc qua profile Room *; Peer do Lead 
 | Peer: tra cứu thuần | Haiku 5.5 Off (Low nếu đối chiếu vài nguồn) | Tìm file/symbol, liệt kê call site, grep log, đọc config/work item rồi báo nguyên văn |
 | Peer: việc cơ học | Sonnet 5.5 Low/Medium | Rename, thêm field theo mẫu, sửa doc, chạy test rồi báo kết quả |
 | Peer: việc cần suy luận (mặc định) | Sonnet 5.5 High | Code, sửa bug, viết test, giải conflict, review PR, tìm nguyên nhân |
-| Peer: rủi ro cao | Opus 5.5 High | Peer Sonnet đã thất bại, hoặc sai sót đắt và khó phát hiện (bảo mật, tách tenant, mất dữ liệu, migration, tiền). Việc lớn hay nhiều file không phải lý do |
+| Peer: rủi ro cao | Opus 5.5 Low (High nếu Peer Opus Low thất bại) | Peer Sonnet đã thất bại, hoặc sai sót đắt và khó phát hiện (bảo mật, tách tenant, mất dữ liệu, migration, tiền). Việc lớn hay nhiều file không phải lý do |
 | Peer: khó nhất | Opus Extra High/Max, Fable 5.2 | Chỉ sau khi Peer Opus thất bại, hoặc quyết định thiết kế rủi ro cao |
 
 Quy tắc chung:
