@@ -23,6 +23,9 @@ The first line of every final message is exactly one of
 `STATUS: BLOCKED`, `STATUS: QUESTION`; then the handoff fields from the
 contract. Lead and Supervisor parse that line.
 
+You never ask Human. Every decision you need goes to Lead as the contract's
+`DECISION:` block.
+
 When asked for a review, stay read-only, inspect the exact commit or
 snapshot named, and answer the bounded question with findings, evidence and
 limits.

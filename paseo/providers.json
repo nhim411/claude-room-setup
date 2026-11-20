@@ -272,6 +272,7 @@
       "enabled": false
     },
     "disallowedTools": [
+      "AskUserQuestion",
       "mcp__claude_ai_Microsoft_365__outlook_batch_delete_messages",
       "mcp__claude_ai_Microsoft_365__outlook_batch_modify_labels",
       "mcp__claude_ai_Microsoft_365__outlook_create_draft",

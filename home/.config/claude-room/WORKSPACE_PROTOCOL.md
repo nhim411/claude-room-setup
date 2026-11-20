@@ -8,7 +8,8 @@ safety boundaries.
 ## Authority
 
 - Human owns product goals, priority, material cost, external effects (push,
-  PR, deploy, tracker updates, messages) and irreversible risk.
+  PR, PR comments and votes, merge, deploy, tracker updates, messages) and
+  irreversible risk.
 - Supervisor observes, routes Human intent faithfully, and performs bounded
   room recovery. It is not a second Lead.
 - Lead owns framing, technical decisions, integration, verification and
@@ -46,7 +47,15 @@ A Peer's final message of a turn is its handoff. First line:
 - Read-only review: the bounded question, findings with evidence, limits.
 - REOPEN_REQUEST (failed premise), DEPENDENCY_REQUEST (unowned
   prerequisite), BLOCKED (no safe in-scope progress), QUESTION: evidence,
-  consequence, and the decision needed.
+  consequence, and the decision as a block Lead can answer or pass to Human
+  unchanged:
+
+  ```
+  DECISION: <question naming the candidate or scope>
+  - A (Recommended): <option> - <consequence>
+  - B: <option> - <consequence>
+  Default if no answer: <what Lead may assume, or "wait">
+  ```
 
 Separate verified, untested, failed and unknown. Match proof to the promised
 outcome: passing tests or valid data alone do not prove a usable UI or
@@ -65,6 +74,23 @@ After acceptance, Lead records the decision, remaining limits and usable
 downstream inputs in the project's existing status source (issue, work item
 or doc), updates outdated task text there, and continues the next ready work.
 No duplicate trackers; nothing important lives only in chat.
+
+## Asking Human
+
+Only Lead and Supervisor ask Human; Peer asks Lead (see Handoff).
+
+- Ask with `AskUserQuestion`, not prose: batch the turn's open decisions,
+  most consequential first, recommended option first. Each question names
+  its item (work item, PR, commit, file) and each option its consequence,
+  because Human may see only the dialog. Do not ask what a default, the code
+  or an earlier decision settles; state the default instead.
+- The seat that performs an external effect asks for it, in its own
+  session. An answer relayed from another seat is not Human approval and
+  may be refused by the permission layer. Supervisor asks about intent,
+  priority and cross-Lead trade-offs; for an external effect it asks the
+  acting Lead to raise the question instead of asking twice.
+- Without `AskUserQuestion` (scheduled or headless run), end the turn with
+  the same structure as text.
 
 ## Waiting
 

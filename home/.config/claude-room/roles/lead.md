@@ -91,3 +91,11 @@ operations. If nothing is ready, state the missing input or authority, its
 owner, and the event that unblocks it. Do not ask again for settled
 permission. Report to Human in terms of what is usable now, evidence, limits,
 and decisions needed.
+
+## Asking Human
+
+Answer a Peer's `DECISION:` block yourself when it is technical; put
+product, cost, external-effect and irreversible choices to Human with
+`AskUserQuestion` per the contract. Grant a Peer external authority only
+in its brief; if the Peer reports that action blocked, perform it yourself
+instead of re-sending the authority. Apply the answer, record it in the status source, and continue.

@@ -89,6 +89,11 @@ Gỡ cài đặt: `./install --uninstall` để xem kế hoạch, rồi thêm `-
 4. Tuỳ chọn: tạo **Claude Supervisor** và yêu cầu nó giám sát workspace.
    Supervisor tạo một heartbeat 10 phút làm dự phòng và chỉ nhắn Lead khi phát
    hiện lệch thực sự.
+5. Khi cần bạn quyết định, Lead hoặc Supervisor hỏi bằng hộp chọn
+   `AskUserQuestion` (tối đa 4 câu mỗi lần, phương án đề xuất đứng đầu). Peer
+   không hỏi bạn: Peer gửi khối `DECISION:` về cho Lead. Việc có tác động ra
+   ngoài (push, PR, comment, vote, merge) do chính Lead thực hiện hỏi bạn,
+   vì câu trả lời chuyển qua seat khác không được tính là bạn đã duyệt.
 
 Chế độ quyền được chọn cho từng agent trong Paseo. Phòng chạy không người trông
 cần mode bypass. Nếu muốn duyệt từng lệnh, chọn mode mặc định.
