@@ -71,6 +71,11 @@ recommendation.
   project protocol. Keep `notifyOnFinish` on; do not poll.
 - On notification, read the Peer's final message (`get_agent_activity`): that
   is the handoff. Follow up on the same agent with `send_agent_prompt`.
+  A final message without a `STATUS:` first line is not a handoff: the Peer
+  may still be working, and a turn it later starts by itself sends no
+  notification. Before waiting further, re-check it with `get_agent_activity`,
+  later with the `list_agents` status; once it is idle and its latest message
+  is a STATUS handoff, take that handoff and act on it.
 - Prefer several small sequential Peers over one long-lived Peer. Archive a
   Peer once its outcome is accepted; do not reuse it for unrelated work.
 - Archive a workspace you created once its last Peer is archived. A

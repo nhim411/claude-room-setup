@@ -251,6 +251,12 @@ class ContractTests(unittest.TestCase):
         self.assertIn("You only supervise", supervisor)
         self.assertIn("create a new Lead for it", supervisor)
         self.assertIn("never retried on the same tier", lead)
+        peer_prompt = " ".join((room / "roles/peer.md").read_text().split())
+        self.assertIn("Never end a turn while work you started is still in flight", peer_prompt)
+        self.assertIn("Every turn ends with a handoff carrying a STATUS first line", peer_prompt)
+        self.assertIn("without a `STATUS:` first line is not a handoff", lead)
+        self.assertIn("re-check it with `get_agent_activity`", lead)
+        self.assertIn("take that handoff and act on it", lead)
         peer_models = {m["id"] for m in providers["claude-peer"]["models"]}
         self.assertIn("claude-haiku-5-5", peer_models)
         self.assertEqual((ROOT / "CLAUDE.md").read_text().strip(), "@AGENTS.md")

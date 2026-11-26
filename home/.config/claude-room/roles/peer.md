@@ -23,6 +23,13 @@ The first line of every final message is exactly one of
 `STATUS: BLOCKED`, `STATUS: QUESTION`; then the handoff fields from the
 contract. Lead and Supervisor parse that line.
 
+Never end a turn while work you started is still in flight (background
+shells, monitors, subagents, test runs): wait inside the same turn (an
+until-loop or Monitor) until the result is in, then write the handoff. Lead
+is notified once per prompt, and not at all for a turn you later start
+yourself, so a message without a STATUS first line can be lost. Every turn
+ends with a handoff carrying a STATUS first line; BLOCKED and QUESTION count.
+
 You never ask Human. Every decision you need goes to Lead as the contract's
 `DECISION:` block.
 
