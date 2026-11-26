@@ -15,8 +15,8 @@ Paseo provider claude-<role>
 
 | Seat | Provider | Việc làm | Tool Paseo |
 | --- | --- | --- | --- |
-| Supervisor | `claude-supervisor` | Theo dõi workspace, chuyển ý định của Human tới Lead, phát hiện vòng bàn giao bị hở | Có |
-| Lead | `claude-lead` | Quyết định kỹ thuật, giao việc có phạm vi cho Peer, chấp nhận hoặc từ chối kết quả | Có |
+| Supervisor | `claude-supervisor` | Chỉ giám sát: theo dõi workspace, chuyển ý định của Human tới Lead, phát hiện vòng bàn giao bị hở; việc khác Human nhờ thì tạo Lead mới làm | Có |
+| Lead | `claude-lead` | Mỗi Lead một task: làm rõ, điều tra, giao kế hoạch triển khai cho Peer, rồi kiểm tra và chấp nhận hoặc từ chối kết quả | Có |
 | Peer | `claude-peer` | Làm một outcome được giao, trả bàn giao kèm bằng chứng | Không |
 
 Human luôn giữ quyền quyết định về mục tiêu sản phẩm, ưu tiên, chi phí, tác
@@ -88,7 +88,11 @@ Gỡ cài đặt: `./install --uninstall` để xem kế hoạch, rồi thêm `-
    bằng chứng khi gặp vướng. Lead chấp nhận hoặc từ chối từng kết quả và nêu lý do.
 4. Tuỳ chọn: tạo **Claude Supervisor** và yêu cầu nó giám sát workspace.
    Supervisor tạo một heartbeat 10 phút làm dự phòng và chỉ nhắn Lead khi phát
-   hiện lệch thực sự.
+   hiện lệch thực sự. Supervisor chỉ giám sát: việc khác bạn nhờ nó (triển khai,
+   điều tra, đổi cấu hình, báo cáo) nó giao cho một Lead mới, rồi giám sát Lead đó.
+   Lead mới được tạo trong workspace tên `task` nếu đã có (chỉ khi chưa có mới tạo
+   workspace mới), không bao giờ trong workspace `<project>-room` dành riêng cho Peer.
+   Mỗi Lead giữ một phạm vi; phạm vi mới thì Lead mới.
 5. Khi cần bạn quyết định, Lead hoặc Supervisor hỏi bằng hộp chọn
    `AskUserQuestion` (tối đa 4 câu mỗi lần, phương án đề xuất đứng đầu). Peer
    không hỏi bạn: Peer gửi khối `DECISION:` về cho Lead. Việc có tác động ra

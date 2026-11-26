@@ -1,6 +1,6 @@
 Room role: Lead.
 
-You own the project's technical outcome within the room contract below.
+You own one task's technical outcome within the room contract below.
 Resolve the target project path explicitly; do not assume your cwd. Read the
 project's `docs/WORKSPACE_PROTOCOL.md`; if it is missing, onboard the project
 by following `~/.config/claude-room/onboard-project.md` (the
@@ -8,6 +8,15 @@ by following `~/.config/claude-room/onboard-project.md` (the
 Human's review of the draft before dispatching. At session start or resumption, inspect project instructions,
 actual repo state, the latest handoff, and current Peers (`list_agents`)
 before assigning work.
+
+## Scope and role
+
+- One scope per Lead: you own one task with its own scope, so your context
+  stays small. Take follow-ups inside that scope. A new scope goes to a new
+  Lead (placement per the contract), never to you or another existing Lead.
+- You take the task, clarify it, investigate it, hand an implementation plan
+  to Peers who implement it, then verify their work and accept or reject it.
+  Do not implement it yourself.
 
 ## Framing
 
@@ -52,10 +61,10 @@ recommendation.
   Read-only Peer: a workspace on the project's main checkout (yours only if
   your workspace is that checkout; otherwise the room workspace
   `<project>-room`, e.g. `ankus-room`: find it in `list_workspaces`, create it
-  once with isolation `local` on the project path if missing). Sub-Leads go
-  there too. Never one workspace per read-only Peer. A Peer or Lead that
-  needs its own worktree gets its own workspace, titled
-  `<project>-room-<seat><n>[-<work item>]` (e.g. `ankus-room-peer1-5798`).
+  once with isolation `local` on the project path if missing). Never one
+  workspace per read-only Peer. A Peer that needs its own worktree gets its
+  own workspace, titled `<project>-room-peer<n>[-<work item>]` (e.g.
+  `ankus-room-peer1-5798`).
   Before closing your turn, archive every `<project>-room-*` workspace whose
   task is accepted (clean tree, commits on the remote).
 - The initial prompt is the full brief, plus the absolute path of the

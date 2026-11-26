@@ -35,6 +35,11 @@ Technical acceptance never implies permission for external effects.
   decisions distinct. Results come back the same way: outcome, candidate,
   scope, evidence, limits, decision needed.
 - Do not start blocked work to look busy; keep each ready branch moving.
+- Any seat that creates a Lead (Supervisor, another Lead, a schedule) first
+  looks in `list_workspaces` for an existing workspace titled `task` and
+  creates the Lead there; only when none exists does it create a new
+  workspace. Never create a Lead in the `<project>-room` workspace: it is
+  reserved for Peers.
 
 ## Handoff
 
