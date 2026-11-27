@@ -15,8 +15,10 @@ Dự án (git repo)  ──>  Workspace Paseo (thư mục làm việc của agen
 
 - Agent chạy trong thư mục của workspace nên đọc được `CLAUDE.md`, `.claude/`,
   skill và rule của dự án đó như khi bạn mở `claude` trong repo.
-- Mỗi Lead giữ đúng một task với phạm vi riêng; phạm vi mới thì tạo Lead mới
-  (ngữ cảnh mỗi Lead nhỏ). Lead mới nằm trong workspace tên `task` nếu đã có,
+- Mỗi Lead sống lâu theo một chủ đề (nhãn `topic:<slug>`), nhận việc trong chủ đề
+  và từ chối việc ngoài chủ đề; việc mới được chuyển cho Lead khớp chủ đề (ngữ cảnh
+  dưới ~100k token), chưa có mới tạo Lead mới kèm ghi chú bàn giao của chủ đề.
+  Lead mới nằm trong workspace tên `task` nếu đã có,
   không bao giờ trong workspace `<project>-room` (dành riêng cho Peer). Một
   Supervisor có thể giám sát nhiều workspace.
 - Peer nào sửa code nên chạy trong **worktree riêng** để không ghi đè lên nhau.
@@ -143,8 +145,8 @@ Peer (`list_pending_permissions`), hỏi lại bạn rồi trả lời hộ bằ
 `respond_to_permission`; đáp án đó được tính là quyết định của chính bạn.
 
 Supervisor chỉ giám sát. Nếu bạn nhờ nó việc khác (triển khai, điều tra, đổi
-cấu hình, báo cáo), nó không tự làm mà tạo một Lead mới với brief đầy đủ rồi
-giám sát Lead đó. Bạn vẫn có thể giao outcome trực tiếp cho Lead.
+cấu hình, báo cáo), nó không tự làm mà giao cho Lead đúng chủ đề (hoặc tạo Lead mới) với brief đầy đủ
+rồi giám sát Lead đó. Bạn vẫn có thể giao outcome trực tiếp cho Lead.
 
 #### Kiểm tra hành vi Supervisor
 

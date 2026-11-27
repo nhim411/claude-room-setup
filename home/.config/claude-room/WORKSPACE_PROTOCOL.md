@@ -35,11 +35,18 @@ Technical acceptance never implies permission for external effects.
   decisions distinct. Results come back the same way: outcome, candidate,
   scope, evidence, limits, decision needed.
 - Do not start blocked work to look busy; keep each ready branch moving.
-- Any seat that creates a Lead (Supervisor, another Lead, a schedule) first
-  looks in `list_workspaces` for an existing workspace titled `task` and
-  creates the Lead there; only when none exists does it create a new
-  workspace. Never create a Lead in the `<project>-room` workspace: it is
-  reserved for Peers.
+- Topic Leads: one long-lived Lead per topic (for example PR follow-up and
+  merge, triage of Human's work items, room/infra, one per active epic). A
+  Lead carries a `topic:<slug>` label and a title naming the topic. It takes
+  requests within its topic and declines requests outside it, telling the
+  sender to route elsewhere.
+- Routing: any seat that creates a Lead (Supervisor, another Lead, a schedule)
+  first routes the request to an existing running or idle Lead whose
+  `topic:` label or title matches and whose context is below ~100k tokens.
+  Otherwise it creates a new Lead for that topic, seeded with the topic's
+  handoff note. The new Lead goes in the workspace titled `task` from
+  `list_workspaces`; a new workspace only when none exists. Never create a
+  Lead in the `<project>-room` workspace: it is reserved for Peers.
 - Before creating a Lead for a recurring job (review queue, merge queue, daily
   report, any job with a schedule), check `list_schedules` and `list_agents` for
   a run of the same job that is active or due soon (for example within 30
@@ -83,6 +90,14 @@ After acceptance, Lead records the decision, remaining limits and usable
 downstream inputs in the project's existing status source (issue, work item
 or doc), updates outdated task text there, and continues the next ready work.
 No duplicate trackers; nothing important lives only in chat.
+
+## Topic handoff note
+
+One file per topic at `~/.local/state/claude-room/handoff/<topic>.md`, at most
+~60 lines: goal, open items with owner, decisions made, live Peers and
+worktrees, next step. The seat that rotates out (a Lead above ~150k tokens, the
+Supervisor's daily restart) overwrites the file, never appends. A new seat
+reads only this file plus the project protocol at start.
 
 ## Asking Human
 

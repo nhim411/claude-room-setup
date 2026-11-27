@@ -16,7 +16,7 @@ Paseo provider claude-<role>
 | Seat | Provider | Việc làm | Tool Paseo |
 | --- | --- | --- | --- |
 | Supervisor | `claude-supervisor` | Chỉ giám sát: theo dõi workspace, chuyển ý định của Human tới Lead, phát hiện vòng bàn giao bị hở; việc khác Human nhờ thì tạo Lead mới làm | Có |
-| Lead | `claude-lead` | Mỗi Lead một task: làm rõ, điều tra, giao kế hoạch triển khai cho Peer, rồi kiểm tra và chấp nhận hoặc từ chối kết quả | Có |
+| Lead | `claude-lead` | Mỗi Lead một chủ đề, từng task trong chủ đề: làm rõ, điều tra, giao kế hoạch triển khai cho Peer, rồi kiểm tra và chấp nhận hoặc từ chối kết quả | Có |
 | Peer | `claude-peer` | Làm một outcome được giao, trả bàn giao kèm bằng chứng | Không |
 
 Human luôn giữ quyền quyết định về mục tiêu sản phẩm, ưu tiên, chi phí, tác
@@ -89,10 +89,13 @@ Gỡ cài đặt: `./install --uninstall` để xem kế hoạch, rồi thêm `-
 4. Tuỳ chọn: tạo **Claude Supervisor** và yêu cầu nó giám sát workspace.
    Supervisor tạo một heartbeat 10 phút làm dự phòng và chỉ nhắn Lead khi phát
    hiện lệch thực sự. Supervisor chỉ giám sát: việc khác bạn nhờ nó (triển khai,
-   điều tra, đổi cấu hình, báo cáo) nó giao cho một Lead mới, rồi giám sát Lead đó.
-   Lead mới được tạo trong workspace tên `task` nếu đã có (chỉ khi chưa có mới tạo
-   workspace mới), không bao giờ trong workspace `<project>-room` dành riêng cho Peer.
-   Mỗi Lead giữ một phạm vi; phạm vi mới thì Lead mới.
+   điều tra, đổi cấu hình, báo cáo) nó giao cho Lead của đúng chủ đề, rồi giám sát Lead đó.
+   Mỗi Lead sống lâu theo một chủ đề (nhãn `topic:<slug>`), nhận việc trong chủ đề
+   và từ chối việc ngoài chủ đề. Supervisor chuyển việc cho Lead đang chạy hoặc rảnh
+   có chủ đề khớp và ngữ cảnh dưới ~100k token; chưa có mới tạo Lead mới kèm ghi chú
+   bàn giao của chủ đề (`~/.local/state/claude-room/handoff/<topic>.md`, ≤ ~60 dòng,
+   ghi đè mỗi lần xoay). Lead mới nằm trong workspace tên `task` nếu đã có, không bao
+   giờ trong workspace `<project>-room` dành riêng cho Peer.
 5. Khi cần bạn quyết định, Lead hoặc Supervisor hỏi bằng hộp chọn
    `AskUserQuestion` (tối đa 4 câu mỗi lần, phương án đề xuất đứng đầu). Peer
    không hỏi bạn: Peer gửi khối `DECISION:` về cho Lead. Lead tự quyết các
