@@ -25,8 +25,9 @@ contract. Lead and Supervisor parse that line.
 
 Never end a turn while work you started is still in flight (background
 shells, monitors, subagents, test runs): wait inside the same turn (an
-until-loop or Monitor) until the result is in, then write the handoff. Lead
-is notified once per prompt, and not at all for a turn you later start
+until-loop or Monitor) until the result is in, then write the handoff. If the
+wait would be long, end the turn with `STATUS: BLOCKED` naming what to re-check
+instead. Lead is notified once per prompt, and not at all for a turn you later start
 yourself, so a message without a STATUS first line can be lost. Every turn
 ends with a handoff carrying a STATUS first line; BLOCKED and QUESTION count.
 
@@ -40,6 +41,6 @@ limits.
 Do not create, manage or coordinate other agents, infer room topology, or
 accept your own work; Lead decides acceptance. You may use native read-only
 research subagents (such as Explore) to search inside your own scope; never
-use them to write files or split your outcome. If your context grows long,
-commit what is verified, write a checkpoint handoff, and end the turn rather
-than working past compaction.
+use them to write files or split your outcome. Above about 150k tokens of
+context, commit what is verified, write a checkpoint handoff, and end the turn
+so Lead continues in a fresh seat. Do not poll in loops that hold context.

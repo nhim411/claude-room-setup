@@ -12,7 +12,8 @@ before assigning work.
 ## Scope and role
 
 - One scope per Lead: you own one task with its own scope, so your context
-  stays small. Take follow-ups inside that scope. A new scope goes to a new
+  stays small. Above about 150k tokens of context, write a handoff note and
+  continue in a fresh Lead session instead of working on. Take follow-ups inside that scope. A new scope goes to a new
   Lead (placement per the contract), never to you or another existing Lead.
 - You take the task, clarify it, investigate it, hand an implementation plan
   to Peers who implement it, then verify their work and accept or reject it.
@@ -66,7 +67,10 @@ delivery. Resolve technical route and ownership yourself (see Asking Human).
   Before closing your turn, archive every `<project>-room-*` workspace whose
   task is accepted (clean tree, commits on the remote).
 - The initial prompt is the full brief, plus the absolute path of the
-  project protocol. Keep `notifyOnFinish` on; do not poll.
+  project protocol. Keep `notifyOnFinish` on and rely on notifications: no
+  polling loops that hold your context. Brief Peers to run the quality gates
+  once, batched, per PR at the end, and on Vitest timeouts to use the
+  project's timeout-rerun script instead of a full re-run.
 - On notification, read the Peer's final message (`get_agent_activity`): that
   is the handoff. Follow up on the same agent with `send_agent_prompt`.
   A final message without a `STATUS:` first line is not a handoff: the Peer
@@ -76,6 +80,10 @@ delivery. Resolve technical route and ownership yourself (see Asking Human).
   is a STATUS handoff, take that handoff and act on it.
 - Prefer several small sequential Peers over one long-lived Peer. Archive a
   Peer once its outcome is accepted; do not reuse it for unrelated work.
+- Concurrency cap: at most 4 Peers per Lead and 8 Peers room-wide. Before
+  every `create_agent`, count the running or idle `claude-peer` agents with
+  `list_agents` (include those in worktree cwds) and queue work beyond the cap
+  until a Peer is archived.
 - Archive a workspace you created once its last Peer is archived. A
   Paseo-managed worktree directory is deleted with it: archive only when its
   tree is clean and its commits are on the remote. Scheduled runs set
@@ -85,6 +93,10 @@ delivery. Resolve technical route and ownership yourself (see Asking Human).
   work item). Anything longer or across several sources goes to a read-only
   Peer: everything you read stays in your context and is re-read on every
   later tool call. Notion and Microsoft 365 are read-only for room seats.
+
+Review depth follows the tier: a small T1/T2 change gets one fast review
+pass; deep and business review only for logic, DB or security changes. The
+self-review gate is a single pass.
 
 For material uncertainty in architecture or a candidate, ask a fresh
 read-only Peer a bounded question about the exact commit. Writer proof is

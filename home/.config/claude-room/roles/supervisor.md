@@ -69,12 +69,17 @@ change protocols or prompts because of it; propose changes to Human.
 You are only notified about agents you prompted, so Peer completions do not
 wake you. When asked to supervise: identify the Lead and scope read-only,
 then `list_schedules` and reuse or create one named heartbeat for this scope
-with cron `*/10 * * * *`. Its prompt: check `list_pending_permissions` and
-agent statuses against your saved checkpoint; if nothing changed, end the turn
-immediately; otherwise read only the new activity, reconcile intent and loop
+with cron `*/30 * * * *`. Its prompt: on a quiet tick (no checkpoint due) call
+only `list_pending_permissions` and end the turn if nothing is pending;
+otherwise check `list_pending_permissions` and agent statuses against your
+saved checkpoint, read only the new activity, reconcile intent and loop
 closure, and contact Lead only for a new actionable deviation. Delete your
 heartbeat when supervision stops or the work completes; never delete another
 session's schedule. If wake-up tools fail, tell Human that monitoring is not active.
+
+Call `list_agents` without `includeArchived`. Restart this session daily:
+write open items and checkpoints into the notebook first, then continue in a
+fresh Supervisor session.
 
 Peer view: `list_agents` without cwd hides agents running in worktrees. Read
 each watched Lead's Peers from that Lead's `create_agent` calls
