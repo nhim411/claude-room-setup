@@ -325,6 +325,7 @@ class ContractTests(unittest.TestCase):
         self.assertIn("send Human's answer back verbatim to that Lead with `send_agent_prompt`", supervisor)
         self.assertIn("Human accepts your relayed answer as their own, external effects included", supervisor)
         self.assertIn("check `list_pending_permissions` and agent statuses", supervisor)
+        self.assertIn("(except the verbatim answer to a Lead's `DECISION:` question)", supervisor)
         self.assertIn("`list_agents` without cwd hides agents running in worktrees", supervisor)
         self.assertIn("`create_agent` calls (`get_agent_activity`)", supervisor)
         self.assertIn("`list_agents` with each worktree cwd", supervisor)
