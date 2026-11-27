@@ -188,6 +188,13 @@ lần gọi tool. Kết quả đo trên máy có nhiều skill và plugin:
 - `settingSources` thay giá trị Paseo truyền vào. Bỏ `user` thì không nạp
   plugin, skill, hook và CLAUDE.md cấp user; skill và rule của dự án vẫn còn.
 - `strictMcpConfig` chỉ giữ MCP do Paseo truyền vào, bỏ các server khác của user.
+- `settings` (object JSON, tuỳ chọn) được truyền qua `--settings`, để bù lại một
+  thiết lập mà nguồn bị bỏ đáng lẽ cung cấp. Supervisor dùng nó để vẫn nạp
+  `AGENTS.md` của dự án (`pluginConfigs.agents-md@builtin.options.instructionFiles`)
+  dù đã bỏ `user`. Claude chỉ giữ cờ `--settings` cuối cùng, nên nếu Paseo đã
+  truyền `--settings` (JSON hoặc file) thì launcher gộp sâu vào một cờ, phần
+  của `launch.json` áp sau cùng; không đọc được thì giữ nguyên cờ của Paseo,
+  bỏ phần của mình và báo lỗi ra stderr.
 
 Notion và Microsoft 365 chỉ được đọc ở Lead và Peer: mọi tool gửi, trả lời,
 tạo, sửa, xoá, di chuyển bị chặn cứng bằng `disallowedTools` trong

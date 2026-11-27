@@ -92,6 +92,43 @@ class LauncherTests(unittest.TestCase):
         peer = json.loads(self.run_launcher("peer", *args).stdout)["argv"]
         self.assertNotIn("--strict-mcp-config", peer)
 
+    def settings_values(self, argv: list[str]) -> list[dict]:
+        return [json.loads(argv[i + 1]) for i, arg in enumerate(argv) if arg == "--settings"]
+
+    def test_launch_policy_settings_only_for_supervisor(self) -> None:
+        args = ["-p", "x"]
+        supervisor = json.loads(self.run_launcher("supervisor", *args).stdout)["argv"]
+        self.assertEqual(self.settings_values(supervisor), [{"pluginConfigs": {"agents-md@builtin": {
+            "options": {"instructionFiles": "claude-md-and-agents-md"}}}}])
+        for role in ("lead", "peer"):
+            argv = json.loads(self.run_launcher(role, *args).stdout)["argv"]
+            self.assertNotIn("--settings", argv)
+
+    def test_launch_policy_settings_merge_with_existing_flag(self) -> None:
+        ours = {"pluginConfigs": {"agents-md@builtin": {"options": {"instructionFiles": "claude-md-and-agents-md"}}}}
+        file = Path(self.temporary.name) / "paseo.json"
+        file.write_text(json.dumps({"model": "m", "pluginConfigs": {"other": {"a": 1}}}))
+        inline = json.dumps({"pluginConfigs": {"agents-md@builtin": {"options": {"instructionFiles": "claude-md"}}}})
+        for given in (["--settings", str(file)], [f"--settings={file}"]):
+            argv = json.loads(self.run_launcher("supervisor", *given, "-p", "x").stdout)["argv"]
+            self.assertEqual(argv.count("--settings"), 1)
+            self.assertEqual(self.settings_values(argv), [{
+                "model": "m",
+                "pluginConfigs": {"other": {"a": 1}, **ours["pluginConfigs"]}}])
+        # inline JSON from Paseo: ours wins on conflict; two flags collapse to one
+        argv = json.loads(self.run_launcher("supervisor", "--settings", inline, "--settings",
+                                            '{"x":1}', "-p", "y").stdout)["argv"]
+        self.assertEqual(self.settings_values(argv), [{"x": 1, **ours}])
+        self.assertEqual(argv.count("--settings"), 1)
+
+    def test_launch_policy_settings_unreadable_existing_flag_is_kept(self) -> None:
+        result = self.run_launcher("supervisor", "--settings", "/nonexistent/paseo.json", "-p", "x")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        argv = json.loads(result.stdout)["argv"]
+        self.assertEqual(argv.count("--settings"), 1)
+        self.assertIn("/nonexistent/paseo.json", argv)
+        self.assertIn("cannot merge existing --settings", result.stderr)
+
     def test_probes_pass_through_without_role_files(self) -> None:
         env = {**self.env, "CLAUDE_ROOM_CONFIG_HOME": str(Path(self.temporary.name) / "missing")}
         for args in (["--version"], ["auth", "status"], ["-h"]):

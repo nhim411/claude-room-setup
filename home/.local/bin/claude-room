@@ -15,6 +15,12 @@ The role prompt is the role text, the shared room contract and common.md.
   sources Paseo passes (dropping "user" skips user plugins, skills, hooks and
   CLAUDE.md) and `strictMcpConfig` keeps only MCP servers passed on the
   command line (Paseo's own server), dropping the operator's other servers.
+  `settings` (a JSON object) is passed as `--settings`, to restore one setting
+  that a dropped source would have supplied (e.g. loading project AGENTS.md).
+  claude keeps only the last `--settings` flag, so existing `--settings`
+  values (inline JSON or a file) are merged with ours applied last; if one
+  cannot be read, Paseo's flag is kept as is, ours is skipped, and a warning
+  goes to stderr.
 
 Nothing is written: auth, skills, hooks and plugins stay in the operator's
 own Claude config. stdout belongs to the SDK stream, so errors go to stderr.
@@ -105,6 +111,56 @@ def launch_policy(role: str) -> dict:
     return policy if isinstance(policy, dict) else {}
 
 
+SETTINGS_FLAG = "--settings"
+
+
+def deep_merge(base: dict, override: dict) -> dict:
+    merged = dict(base)
+    for key, value in override.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = deep_merge(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
+def load_settings(value: str) -> dict:
+    """Parse a `--settings` value: inline JSON object or a path to a JSON file."""
+    text = value if value.lstrip().startswith("{") else pathlib.Path(value).expanduser().read_text(encoding="utf-8")
+    parsed = json.loads(text)
+    if not isinstance(parsed, dict):
+        raise ValueError("settings is not a JSON object")
+    return parsed
+
+
+def apply_settings(args: list[str], extra: dict) -> list[str]:
+    """Merge `extra` into the single `--settings` claude honours (ours last)."""
+    rest: list[str] = []
+    existing: list[str] = []
+    index = 0
+    while index < len(args):
+        arg = args[index]
+        if arg == SETTINGS_FLAG and index + 1 < len(args):
+            existing.append(args[index + 1])
+            index += 2
+        elif arg.startswith(SETTINGS_FLAG + "="):
+            existing.append(arg.split("=", 1)[1])
+            index += 1
+        else:
+            rest.append(arg)
+            index += 1
+    merged: dict = {}
+    try:
+        for value in existing:
+            merged = deep_merge(merged, load_settings(value))
+    except (OSError, ValueError) as error:
+        print(f"claude-room: cannot merge existing --settings ({type(error).__name__}); "
+              "keeping it and skipping launch.json settings", file=sys.stderr)
+        return args
+    merged = deep_merge(merged, extra)
+    return [*rest, SETTINGS_FLAG, json.dumps(merged, separators=(",", ":"), ensure_ascii=False)]
+
+
 def apply_policy(args: list[str], policy: dict) -> list[str]:
     sources = policy.get("settingSources")
     result: list[str] = []
@@ -123,6 +179,9 @@ def apply_policy(args: list[str], policy: dict) -> list[str]:
         result.append(f"--setting-sources={sources}")
     if policy.get("strictMcpConfig") and "--strict-mcp-config" not in result:
         result.append("--strict-mcp-config")
+    extra = policy.get("settings")
+    if isinstance(extra, dict) and extra:
+        result = apply_settings(result, extra)
     return result
 
 

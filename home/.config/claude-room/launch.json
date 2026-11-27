@@ -1,5 +1,9 @@
 {
-  "supervisor": {"settingSources": "project,local", "strictMcpConfig": true},
+  "supervisor": {
+    "settingSources": "project,local",
+    "strictMcpConfig": true,
+    "settings": {"pluginConfigs": {"agents-md@builtin": {"options": {"instructionFiles": "claude-md-and-agents-md"}}}}
+  },
   "lead": {},
   "peer": {}
 }
