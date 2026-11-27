@@ -40,6 +40,10 @@ Technical acceptance never implies permission for external effects.
   creates the Lead there; only when none exists does it create a new
   workspace. Never create a Lead in the `<project>-room` workspace: it is
   reserved for Peers.
+- Before creating a Lead for a recurring job (review queue, merge queue, daily
+  report, any job with a schedule), check `list_schedules` and `list_agents` for
+  a run of the same job that is active or due soon (for example within 30
+  minutes). If one exists, reuse it or wait for it; do not create a duplicate.
 
 ## Handoff
 
@@ -93,11 +97,24 @@ Only Lead and Supervisor ask Human; Peer asks Lead (see Handoff).
   belongs in a final report and a Peer's `DECISION:` block that only Human
   can answer. A report may summarise a decision already asked or answered;
   it must not leave one unasked.
-- The seat that performs an external effect asks for it, in its own
-  session. An answer relayed from another seat is not Human approval and
-  may be refused by the permission layer. Supervisor asks about intent,
-  priority and cross-Lead trade-offs; for an external effect it asks the
-  acting Lead to raise the question instead of asking twice.
+- Route through an active Supervisor. Before asking Human, a Lead checks
+  `list_agents` for a Supervisor: provider `claude-supervisor`, status running
+  or idle, that created it or watches its project (its cwd may be another
+  project). If one exists, the Lead sends its questions to it with
+  `send_agent_prompt`, one `DECISION:` block per question (same shape as in
+  Handoff, with the item, each option's consequence, recommended option first
+  and the default), then waits or continues unrelated ready work; it does not
+  also ask in its own tab. The Supervisor batches them into its own
+  `AskUserQuestion`, naming the asking Lead and item, and sends Human's answer
+  back verbatim with `send_agent_prompt`. Only when no Supervisor is active
+  does a Lead use its own `AskUserQuestion`.
+- Human accepts an answer relayed by Supervisor as their own decision, external
+  effects included. If the permission layer still refuses an outward or
+  irreversible action (push, PR, comments, votes, merge, deploy, tracker
+  update, message) taken on relayed authority, the acting seat asks once more
+  with its own `AskUserQuestion`, quoting the relayed answer, then acts; it
+  does not re-route the question. A Peer never asks Human and gets external
+  authority only from its brief.
 - Only without `AskUserQuestion` (scheduled or headless run), end the turn
   with the open decisions as `DECISION:` blocks in text.
 

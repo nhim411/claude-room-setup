@@ -34,7 +34,8 @@ Dự án (git repo)  ──>  Workspace Paseo (thư mục làm việc của agen
 4. Lead điều tra repo, chia việc, tạo Peer qua tool Paseo, rồi nghiệm thu từng
    kết quả bằng ACCEPT hoặc REJECT kèm lý do.
 5. Bạn chỉ trả lời khi Lead hỏi những việc thuộc quyền Human: phạm vi sản phẩm,
-   push/merge/deploy, chi phí, thao tác không đảo ngược được.
+   push/merge/deploy, chi phí, thao tác không đảo ngược được. Khi có Supervisor
+   đang chạy, câu hỏi đi qua Supervisor và đáp án của bạn được chuyển lại cho Lead.
 6. Khi phòng chạy lâu, tạo **Claude Supervisor** để nó canh luồng làm việc.
 
 Một outcome tốt gồm: kết quả quan sát được, ràng buộc, những gì Lead được phép
@@ -137,7 +138,9 @@ paseo run --provider claude-supervisor --mode bypass --title "Supervisor shop" \
 
 Supervisor tạo heartbeat 10 phút và kiểm tra vòng "Lead giao, Peer trả, Lead
 nghiệm thu". Nó chỉ nhắn Lead khi thấy vòng bị hở hoặc việc đi lệch mục tiêu,
-và không tự sửa code.
+và không tự sửa code. Mỗi heartbeat nó cũng quét câu hỏi đang chờ của Lead và
+Peer (`list_pending_permissions`), hỏi lại bạn rồi trả lời hộ bằng
+`respond_to_permission`; đáp án đó được tính là quyết định của chính bạn.
 
 Supervisor chỉ giám sát. Nếu bạn nhờ nó việc khác (triển khai, điều tra, đổi
 cấu hình, báo cáo), nó không tự làm mà tạo một Lead mới với brief đầy đủ rồi
@@ -165,8 +168,9 @@ và `--verify` chỉ chứng minh prompt được nạp, không chứng minh hà
 ## Trả lời câu hỏi của Lead
 
 Khi cần bạn quyết định (ví dụ quy tắc nghiệp vụ chưa có trong dự án), Lead hỏi
-bằng câu hỏi trắc nghiệm. Câu hỏi hiện trong app Paseo như một yêu cầu cần chú
-ý của agent Lead, và Lead dừng ở đó cho tới khi bạn chọn. Nếu bạn nói trước
+bằng câu hỏi trắc nghiệm. Nếu có Supervisor đang chạy, câu hỏi hiện ở Supervisor
+(gộp nhiều câu thành một); nếu không, nó hiện trong app Paseo như một yêu cầu cần
+chú ý của agent Lead. Lead dừng ở đó cho tới khi bạn chọn. Nếu bạn nói trước
 rằng sẽ vắng mặt, Lead dừng và ghi rõ quyết định cần bạn trong báo cáo cuối.
 
 Kết quả mỗi lượt của Lead có dạng: cái gì dùng được, `ACCEPT <sha>: <lý do>`

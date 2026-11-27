@@ -34,6 +34,9 @@ upgraded or removed, run `python install --apply` again.
   backup. Never print tokens or credentials.
 - Use `paseo daemon reload`, not a daemon restart: a restart kills running agents.
 - Do not commit or push this repository unless the user asks.
+- When several Leads change this repo at once, only the Lead that pushes last
+  to main runs `./install --apply`, from main. The others never install from a
+  branch.
 
 ## 1. Check prerequisites
 

@@ -95,15 +95,18 @@ Gỡ cài đặt: `./install --uninstall` để xem kế hoạch, rồi thêm `-
    Mỗi Lead giữ một phạm vi; phạm vi mới thì Lead mới.
 5. Khi cần bạn quyết định, Lead hoặc Supervisor hỏi bằng hộp chọn
    `AskUserQuestion` (tối đa 4 câu mỗi lần, phương án đề xuất đứng đầu). Peer
-   không hỏi bạn: Peer gửi khối `DECISION:` về cho Lead. Việc có tác động ra
-   ngoài (push, PR, comment, vote, merge) do chính Lead thực hiện hỏi bạn,
-   vì câu trả lời chuyển qua seat khác không được tính là bạn đã duyệt.
-   Lead tự quyết các lựa chọn kỹ thuật trong phạm vi của mình và chỉ hỏi bạn về
-   ý định, ưu tiên, quyết định sản phẩm/kinh doanh. Câu hỏi của Lead chỉ hiện ở
-   tab của Lead đó; Supervisor quét `list_pending_permissions` mỗi lần heartbeat,
-   hỏi lại bạn bằng `AskUserQuestion` của chính nó rồi trả đáp án về cho agent
-   (với việc có tác động ra ngoài, nó nhắc bạn xác nhận ở tab của agent đó, trừ
-   khi bạn đã chủ động cho phép nó trả lời hộ).
+   không hỏi bạn: Peer gửi khối `DECISION:` về cho Lead. Lead tự quyết các
+   lựa chọn kỹ thuật trong phạm vi của mình và chỉ hỏi bạn về ý định, ưu tiên,
+   quyết định sản phẩm/kinh doanh và việc có tác động ra ngoài (push, PR,
+   comment, vote, merge). Khi có Supervisor đang chạy, Lead gửi câu hỏi cho
+   Supervisor; Supervisor gộp thành một `AskUserQuestion` rồi chuyển đáp án của
+   bạn về đúng Lead. Chỉ khi không có Supervisor, Lead mới hỏi ở tab của mình.
+   Đáp án do Supervisor chuyển được tính là quyết định của chính bạn, kể cả việc
+   có tác động ra ngoài; nếu lớp quyền vẫn từ chối, agent đó hỏi lại một lần
+   ngay trong tab của nó. Mỗi heartbeat Supervisor còn quét
+   `list_pending_permissions` để hỏi lại thay cho câu hỏi bị ẩn trong tab của
+   Lead hoặc Peer và trả lời bằng `respond_to_permission`, ghi rõ lựa chọn trong
+   báo cáo.
 
 Chế độ quyền được chọn cho từng agent trong Paseo. Phòng chạy không người trông
 cần mode bypass. Nếu muốn duyệt từng lệnh, chọn mode mặc định.

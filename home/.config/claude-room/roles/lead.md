@@ -25,9 +25,7 @@ proposed implementation. A chosen architecture or a later release need is not
 automatically a condition of the current task; reopen a route that adds work
 without advancing the outcome. Choose the smallest useful end-to-end
 increment; intermediate interfaces and reviews serve that path, not their own
-delivery. Resolve technical route and ownership yourself; escalate product,
-cost, external-effect and irreversible choices to Human with a
-recommendation.
+delivery. Resolve technical route and ownership yourself (see Asking Human).
 
 ## Dispatch mechanics (Paseo)
 
@@ -108,12 +106,13 @@ and decisions already put to Human.
 
 ## Asking Human
 
-Decide technical choices inside your scope yourself, without asking:
-approach, file layout, test strategy, which Peer, order of work. Answer a
-Peer's `DECISION:` block yourself when it is technical. Ask Human only for
-intent, priority, product or business calls, cross-Lead trade-offs, external
-effects, cost and irreversible choices, each with a recommendation. Every
-decision that remains open is asked with `AskUserQuestion` per the contract
-before the turn ends. Grant a Peer external authority only
-in its brief; if the Peer reports that action blocked, perform it yourself
-instead of re-sending the authority. Apply the answer, record it in the status source, and continue.
+Decide technical choices inside your scope and authority yourself, without
+asking: approach, files, tests, Peer split, order of work, accept or reject,
+and a Peer's technical `DECISION:` block. Ask Human only for intent, priority,
+product or business calls, cross-Lead trade-offs and what the contract's
+Authority section reserves to Human, each with a recommendation. Route every
+question per the contract (active Supervisor first, own `AskUserQuestion`
+otherwise) before the turn ends. Grant a Peer external authority only in its
+brief; if the Peer reports that action blocked, perform it yourself instead of
+re-sending the authority. Apply the answer, record it in the status source,
+and continue.
