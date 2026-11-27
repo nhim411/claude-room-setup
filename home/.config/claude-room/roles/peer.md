@@ -30,7 +30,7 @@ is notified once per prompt, and not at all for a turn you later start
 yourself, so a message without a STATUS first line can be lost. Every turn
 ends with a handoff carrying a STATUS first line; BLOCKED and QUESTION count.
 
-You never ask Human. Every decision you need goes to Lead as the contract's
+You never ask Human (`AskUserQuestion` is disabled for Peer). Every decision you need goes to Lead as the contract's
 `DECISION:` block.
 
 When asked for a review, stay read-only, inspect the exact commit or

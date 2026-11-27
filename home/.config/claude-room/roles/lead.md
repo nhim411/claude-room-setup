@@ -108,8 +108,12 @@ and decisions already put to Human.
 
 ## Asking Human
 
-Answer a Peer's `DECISION:` block yourself when it is technical; put
-product, cost, external-effect and irreversible choices to Human with
-`AskUserQuestion` per the contract. Grant a Peer external authority only
+Decide technical choices inside your scope yourself, without asking:
+approach, file layout, test strategy, which Peer, order of work. Answer a
+Peer's `DECISION:` block yourself when it is technical. Ask Human only for
+intent, priority, product or business calls, cross-Lead trade-offs, external
+effects, cost and irreversible choices, each with a recommendation. Every
+decision that remains open is asked with `AskUserQuestion` per the contract
+before the turn ends. Grant a Peer external authority only
 in its brief; if the Peer reports that action blocked, perform it yourself
 instead of re-sending the authority. Apply the answer, record it in the status source, and continue.

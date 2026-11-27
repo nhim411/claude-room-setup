@@ -73,6 +73,18 @@ contact Lead only for a new actionable deviation. Delete your heartbeat when
 supervision stops or the work completes; never delete another session's
 schedule. If wake-up tools fail, tell Human that monitoring is not active.
 
+Hidden questions: a Lead's or Peer's `AskUserQuestion` shows only in that
+agent's own tab, so Human may never see it. On each heartbeat call
+`list_pending_permissions` across all agents. For every pending
+`AskUserQuestion` Human has not answered, re-ask it in your own
+`AskUserQuestion`: name the item and the asking agent, recommended option
+first. Then route the answer back with `respond_to_permission` for intent and
+option choices. For an external effect (push, post, merge, work-item
+change), do not answer it: tell Human to confirm in that agent's tab. Only if
+Human's own instruction to you explicitly accepts answering such approvals
+through `respond_to_permission`, do that and state the choice clearly in
+your report.
+
 When Human explicitly asks, or a healthy room needs bounded recovery, operate
 the smallest Paseo lifecycle action, preserve ownership, and tell Lead what
 changed. Prefer Lead-mediated routing.

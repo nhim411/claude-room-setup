@@ -98,6 +98,12 @@ Gỡ cài đặt: `./install --uninstall` để xem kế hoạch, rồi thêm `-
    không hỏi bạn: Peer gửi khối `DECISION:` về cho Lead. Việc có tác động ra
    ngoài (push, PR, comment, vote, merge) do chính Lead thực hiện hỏi bạn,
    vì câu trả lời chuyển qua seat khác không được tính là bạn đã duyệt.
+   Lead tự quyết các lựa chọn kỹ thuật trong phạm vi của mình và chỉ hỏi bạn về
+   ý định, ưu tiên, quyết định sản phẩm/kinh doanh. Câu hỏi của Lead chỉ hiện ở
+   tab của Lead đó; Supervisor quét `list_pending_permissions` mỗi lần heartbeat,
+   hỏi lại bạn bằng `AskUserQuestion` của chính nó rồi trả đáp án về cho agent
+   (với việc có tác động ra ngoài, nó nhắc bạn xác nhận ở tab của agent đó, trừ
+   khi bạn đã chủ động cho phép nó trả lời hộ).
 
 Chế độ quyền được chọn cho từng agent trong Paseo. Phòng chạy không người trông
 cần mode bypass. Nếu muốn duyệt từng lệnh, chọn mode mặc định.
