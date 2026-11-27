@@ -89,13 +89,17 @@ Only Lead and Supervisor ask Human; Peer asks Lead (see Handoff).
   its item (work item, PR, commit, file) and each option its consequence,
   because Human may see only the dialog. Do not ask what a default, the code
   or an earlier decision settles; state the default instead.
+- Ask every open decision before ending the turn, including one that
+  belongs in a final report and a Peer's `DECISION:` block that only Human
+  can answer. A report may summarise a decision already asked or answered;
+  it must not leave one unasked.
 - The seat that performs an external effect asks for it, in its own
   session. An answer relayed from another seat is not Human approval and
   may be refused by the permission layer. Supervisor asks about intent,
   priority and cross-Lead trade-offs; for an external effect it asks the
   acting Lead to raise the question instead of asking twice.
-- Without `AskUserQuestion` (scheduled or headless run), end the turn with
-  the same structure as text.
+- Only without `AskUserQuestion` (scheduled or headless run), end the turn
+  with the open decisions as `DECISION:` blocks in text.
 
 ## Waiting
 

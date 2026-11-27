@@ -104,7 +104,7 @@ normal-path implementation continue; it does not authorize live destructive
 operations. If nothing is ready, state the missing input or authority, its
 owner, and the event that unblocks it. Do not ask again for settled
 permission. Report to Human in terms of what is usable now, evidence, limits,
-and decisions needed.
+and decisions already put to Human.
 
 ## Asking Human
 
